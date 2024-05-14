@@ -1,0 +1,10 @@
+SNOWFLAKE_ACCOUNT='zaagbib-tv78389'
+SNOWFLAKE_USER='gddvdata'
+SNOWFLAKE_PASSWORD='Gddvdata1'
+SNOWFLAKE_WAREHOUSE='COMPUTE_WH'
+
+snowflake_conn_prop = {
+"account":SNOWFLAKE_ACCOUNT,
+"user":SNOWFLAKE_USER,
+"password":SNOWFLAKE_PASSWORD
+}

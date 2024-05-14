@@ -1,0 +1,5 @@
+server_name = "omniqsuiteserver.database.windows.net"
+database_name = "testOmniQSuite"
+user_name = "OmniQSuite"
+password_name = "DataQuality@#123"
+driver_name = "{ODBC Driver 18 for SQL Server}"
