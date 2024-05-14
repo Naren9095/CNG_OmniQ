@@ -1,6 +1,6 @@
 from snowflake.snowpark.session import Session
 from snowflake.snowpark import version
-from cred_snow import snowflake_conn_prop
+from snow_cred import snowflake_conn_prop
 
 #creating the session in snowflake
 session = Session.builder.configs(snowflake_conn_prop).create()
