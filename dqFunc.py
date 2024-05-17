@@ -1,6 +1,7 @@
 import os
 import re
 import google.generativeai as genai
+from pandas import DataFrame
 import pyodbc as pyodbc
 from pyodbc import Connection
 from snowflake.snowpark.session import Session
@@ -75,3 +76,15 @@ def createQueryFromGemini(query) -> str:
     else:
         # Handle cases where the response doesn't contain the expected format
         return "Unable to extract query from response."
+
+def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
+    query = f"Give me {os.environ.get('TOTAL_COUNT_VALIDATION')} for the following {os.environ.get(dbProvider)} table.{my_schema}"
+    pass
+
+def executeQuery() -> DataFrame | str:
+    pass
+
+def validate(dbProvider:str,connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
+    script = createQuery(dbProvider,database,schema,table,check,columns)
+    resultDataframe = executeQuery(dbProvider,connectionDetails,script)
+    return resultDataframe
