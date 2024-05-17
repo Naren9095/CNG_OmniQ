@@ -3,7 +3,6 @@ import pandas as pd
 import sqlalchemy as sa
 
 #imports from the py file
-from sql_server_queries import q_user_schemas,schema_name,q_table_names
 from sql_connection import engine
 
 
@@ -25,6 +24,15 @@ from sql_connection import engine
 
 
 #Schema names
+q_user_schemas = '''
+select s.name as schema_name
+    --,s.schema_id,
+    --u.name as schema_owner
+from sys.schemas s
+    inner join sys.sysusers u
+        on u.uid = s.principal_id
+where u.issqluser = 1
+    and u.name not in ('sys', 'guest', 'INFORMATION_SCHEMA')'''
 with engine.begin() as conn:
     df = pd.read_sql_query(q_user_schemas, conn)
 print(df)

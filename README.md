@@ -1,1 +1,0 @@
-# CNG_OmniQ
