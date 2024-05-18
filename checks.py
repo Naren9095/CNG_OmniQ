@@ -34,7 +34,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     
     listOfTableColumns = {
         "SourceColumns": getSnowflakeColumns(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table) if source_connection_details['type'] != TYPE_AZURE_SQL_SERVER else getAzureSQLColumns(connectionDetails=source_connection_details,schema=source_schema,table=source_table),
-        "TargetColumns": ["Super", "Bat", "Wonder", "knk"]
+        "TargetColumns": [] if check_type == "Data Validation" else getSnowflakeColumns(connectionDetails=target_connection_details,database=target_database,schema=target_schema,table=target_table) if target_connection_details['type'] != TYPE_AZURE_SQL_SERVER else getAzureSQLColumns(connectionDetails=target_connection_details,schema=target_schema,table=target_table)
     }
 
     listOfChecksColumnsList = {}
@@ -57,7 +57,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                     if(listOfChecks[check]):
                         options = st.multiselect("Choose the necessary columns to perform checks", listOfTableColumns["SourceColumns"], key=check)
                         listOfChecksColumnsList[check] = options
-                case "Data Reconcilation":
+                case "Data Reconciliation":
                     if(listOfChecks[check]):
                         if(check not in checks_where_columns_mapping_not_needed):
                             minColumnListNum = min(len(listOfTableColumns["SourceColumns"]), len(listOfTableColumns["TargetColumns"]))

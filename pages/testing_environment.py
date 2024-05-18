@@ -26,8 +26,8 @@ SNOWFLAKE_CONNECTION = {
       }
 
 #DATA VALIDATION
-checks_list(source_connection_details=AZURE_CONNECTION,source_database=AZURE_CONNECTION["database"],source_schema="dbo",source_table="youtube_channel",check_type="Data Validation")
+# checks_list(source_connection_details=AZURE_CONNECTION,source_database=AZURE_CONNECTION["database"],source_schema="dbo",source_table="youtube_channel",check_type="Data Validation")
 
 
 #RECONCILIATION
-# checks_list(check_type="Data Reconciliation",source_connection_details=AZURE_CONNECTION,source_database=AZURE_CONNECTION["database"],source_schema="dbo",source_table="youtube_channel",target_connection_details=SNOWFLAKE_CONNECTION,target_database="OMNIQ",target_schema="RAW",target_table="YOUTUBE")
+checks_list(check_type="Data Reconciliation",source_connection_details=AZURE_CONNECTION,source_database=AZURE_CONNECTION["database"],source_schema="dbo",source_table="youtube_channel",target_connection_details=SNOWFLAKE_CONNECTION,target_database="OMNIQ",target_schema="RAW",target_table="YOUTUBE")
