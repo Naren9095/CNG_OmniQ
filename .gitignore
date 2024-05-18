@@ -1,2 +1,6 @@
 cng/
 __pycache__/
+venv/
+.venv/
+.DS_Store
+.gitignore
