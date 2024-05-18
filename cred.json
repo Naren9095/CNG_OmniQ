@@ -1,0 +1,14 @@
+{
+   "username1": {
+      "connections": {
+         "sqlserver_conn1": {
+            "user_name": "OmniQSuite",
+            "password": "DataQuality@#123",
+            "server_name": "omniqsuiteserver.database.windows.net",
+            "database_name": "testOmniQSuite",
+            "type": "AZURE_SQL_SERVER",
+            "connection_name": "sqlserver_conn1"
+         }
+      }
+   }
+}

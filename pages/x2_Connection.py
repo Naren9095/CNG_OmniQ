@@ -1,6 +1,6 @@
 import streamlit as st
 from sql_cred import sql_Server_Cred,snow_Cred
-import json
+import json,os
 
 st.set_page_config(layout="wide")
 hide_menu_style = """
@@ -15,14 +15,14 @@ def newConn():
     st.markdown("### Create a Connection")
 
     #Selecting a Connection
-    DataSource = st.selectbox('select a DataSource',['SqlServer','MySQL','Snowflake'])
+    DataSource = st.selectbox('select a DataSource',['SQLSERVER','MYSQL','SNOWFLAKE'])
     st.markdown('####')
     st.markdown('####')
 
     #Entering the connection Details
-    if DataSource == 'SqlServer':
+    if DataSource == 'SQLSERVER':
         sql_Server_Cred('','','','','','new_connection')
-    elif DataSource == 'Snowflake':
+    elif DataSource == 'SNOWFLAKE':
         snow_Cred('','','','','new_connection')
     else:
         pass
@@ -42,19 +42,22 @@ with top_container:
         newConn()
 
     if newconnbutton=='Existing Connections':
-        with open(r'/Users/naren/Documents/cred_cng/cred.json','r') as openfile:
-            cred2 = json.load(openfile)
-            # st.write(cred2)
-            # st.write(cred2['username1']['connections'].keys())
-            
-        st.markdown("### Existing Connections")
-        conn = st.selectbox('Select a connection to edit',list(cred2['username1']['connections'].keys()))
-        st.markdown('####')
-        st.markdown('####')
+        if os.path.exists('./cred.json'):
+            with open(r'./cred.json','r') as openfile:
+                cred2 = json.load(openfile)
+                # st.write(cred2)
+                # st.write(cred2['username1']['connections'].keys())
+                
+            st.markdown("### Existing Connections")
+            conn = st.selectbox('Select a connection to edit',list(cred2['username1']['connections'].keys()))
+            st.markdown('####')
+            st.markdown('####')
 
-        # st.write(cred2['username1']['connections'][conn])
-        connection_name = cred2['username1']['connections'][conn]
-        if connection_name['type'] == 'SqlServer':
-            sql_Server_Cred(user_name=connection_name['user_name'],password=connection_name['password'],server_name=connection_name['server_name'],database_name=connection_name['database_name'],connection_name=conn,connection_from='existing_connection')
-        if connection_name['type'] == 'Snowflake':
-            snow_Cred(account=connection_name['account'],user_name=connection_name['user_name'],password=connection_name['password'],connection_name=conn,connection_from='existing_connection')
+            # st.write(cred2['username1']['connections'][conn])
+            connection_name = cred2['username1']['connections'][conn]
+            if connection_name['type'] == 'AZURE_SQL_SERVER':
+                sql_Server_Cred(user_name=connection_name['user_name'],password=connection_name['password'],server_name=connection_name['server_name'],database_name=connection_name['database_name'],connection_name=conn,connection_from='existing_connection')
+            if connection_name['type'] == 'SNOWFLAKE':
+                snow_Cred(account=connection_name['account'],user_name=connection_name['user_name'],password=connection_name['password'],connection_name=conn,connection_from='existing_connection')
+        else:
+            st.error('No Existing Connections. Create a Connection first')

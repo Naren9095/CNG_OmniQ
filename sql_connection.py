@@ -7,48 +7,50 @@ from snowflake.snowpark import version
 import json
 import os
 
-cred,cred1,cred2 = {},{},{}
 
 def saving_Cred(server_cred):
-    if os.path.exists('/Users/naren/Documents/cred_cng/cred.json'):
+    cred,cred1,cred2 = {},{},{}
+    if os.path.exists('./cred.json'):
             # pass
-            with open(r'/Users/naren/Documents/cred_cng/cred.json','r') as openfile:
-                st.write('file opened')
+            with open(r'./cred.json','r') as openfile:
+                # st.write('file opened')
                 cred2 = json.load(openfile)
                 # st.write('reading from file')
-                st.write(cred2)
-                st.write(server_cred)
+                # st.write(cred2)
+                # st.write(server_cred)
                 connection_name = server_cred['connection_name']
                 cred2['username1']['connections'][connection_name] = server_cred
-                st.write(cred2)
+                # st.write(cred2)
             jsonObj = json.dumps(cred2,indent=3)
-            with open(r'/Users/naren/Documents/cred_cng/cred.json','w') as outputfile:
+            with open(r'./cred.json','w') as outputfile:
                 outputfile.write(jsonObj)
             st.success('Saved successfully')
     else:
-        cred[server_cred.connection_name] = server_cred
+        # st.write('new file creation')
+        cr = server_cred['connection_name']
+        cred[cr] = server_cred
         cred1["connections"] = cred
         cred2["username1"] = cred1
-        st.write(cred2)
         jsonObj = json.dumps(cred2,indent=3)
-        with open(r'/Users/naren/Documents/cred_cng/cred.json','w') as outputfile:
+        with open(r'./cred.json','w') as outputfile:
             outputfile.write(jsonObj)
         st.success('Saved successfully')
 
 def deleting_Cred(connection_name):
-    if os.path.exists('/Users/naren/Documents/cred_cng/cred.json'):
+    cred2 = {}
+    if os.path.exists('./cred.json'):
             # pass
-            with open(r'/Users/naren/Documents/cred_cng/cred.json','r') as openfile:
-                st.write('file opened')
+            with open(r'./cred.json','r') as openfile:
+                # st.write('file opened')
                 cred2 = json.load(openfile)
                 # st.write('reading from file')
-                st.write(cred2)
-                st.write(connection_name)
+                # st.write(cred2)
+                # st.write(connection_name)
                 
                 del cred2['username1']['connections'][connection_name]
-                st.write(cred2)
+                # st.write(cred2)
             jsonObj = json.dumps(cred2,indent=3)
-            with open(r'/Users/naren/Documents/cred_cng/cred.json','w') as outputfile:
+            with open(r'./cred.json','w') as outputfile:
                 outputfile.write(jsonObj)
             st.error('Deleted Succesfully')
 
@@ -64,7 +66,7 @@ def sql_Server_Conn(user_name,password,server_name,database_name,connection_name
         st.success('Connection is successful')
 
         #Saving the username and password in a Dictionary variable
-        sql_server_cred = {"user_name":user_name,"password":password,"server_name":server_name,"database_name":database_name,"type":"SqlServer","connection_name":connection_name}
+        sql_server_cred = {"user_name":user_name,"password":password,"server_name":server_name,"database_name":database_name,"type":"AZURE_SQL_SERVER","connection_name":connection_name}
 
         saving_Cred(sql_server_cred)
         # return sql_server_cred
@@ -84,7 +86,7 @@ def snow_Conn(account,user_name,password,connection_name):
         st.success('Connection is successful')
 
         #Saving the username and password in a Dictionary variable
-        snow_cred = {"account":account,"user_name":user_name,"password":password,"connection_name":connection_name,"type":"Snowflake"}
+        snow_cred = {"account":account,"user_name":user_name,"password":password,"connection_name":connection_name,"type":"SNOWFLAKE"}
         saving_Cred(snow_cred)
 
     except Exception as e:
