@@ -128,7 +128,7 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
     elif(os.environ.get(dbProvider) == 'azure sql server'):
         description = getAzureSqlDescription(connectionDetails,schema,table)
     if(columns != None):
-        query = f"Give me {os.environ.get(check)} for the following columns {", ".join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
+        query = f"Give me {os.environ.get(check)} for the following columns {', '.join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
     elif(columns == None):
         query = f"Give me {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
     return query
