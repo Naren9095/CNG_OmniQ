@@ -1,14 +1,15 @@
 import os
 import re
 import google.generativeai as genai
+import pandas as pd
 from pandas import DataFrame
 import pyodbc as pyodbc
 from pyodbc import Connection
 from snowflake.snowpark.session import Session
 from dotenv import load_dotenv
 load_dotenv()
-
-def createSnowflakeConnection(account,user,password,database:str=None,schema:str=None,role:str=None,warehouse:str=None,needConnection:bool = False) -> Session | str:
+ 
+def getSnowflakeConnection(account,user,password,database:str=None,schema:str=None,role:str=None,warehouse:str=None,needConnection:bool = False) -> Session | str:
     session = None
     snowflake_conn_prop = {
         "account":account,
@@ -30,18 +31,42 @@ def createSnowflakeConnection(account,user,password,database:str=None,schema:str
         return "Connection successfull"
     else:
         return session
-    
-def getSnowflakeSchema(connectionDetails,database,schema,table):
+ 
+def getSnowflakeDescription(connectionDetails,database,schema,table):
     try:
-        snowflakeSession = createSnowflakeConnection(connectionDetails.account,connectionDetails.user,connectionDetails.password,True)
+        snowflakeSession = getSnowflakeConnection(connectionDetails.account,connectionDetails.user,connectionDetails.password,True)
         result = snowflakeSession.sql(f"SELECT GET_DDL('TABLE', '{database}.{schema}.{table}') AS ddl FROM INFORMATION_SCHEMA.TABLES limit 1;").toPandas()['DDL'][0].upper()
         query = result.replace(f"CREATE OR REPLACE TABLE {table.upper()} ",f"{database}.{schema}.{table}")
         snowflakeSession.close()
         return query
     except Exception as e:
         return f"{os.environ.get('SCHEMA_FETCH_ERROR')}. Error: {repr(e)}"
-
-def createAzureSQLConnection(server,database,username,password,needConnection:bool = False) -> Connection | str:
+    
+def getSnowflakeDatabases(connectionDetails):
+    query = "select database_name from information_schema.databases;"
+    df = executeQuery(os.environ.get('SNOWFLAKE'),connectionDetails,query)
+    databaseList = df['DATABASE_NAME'].values.tolist()
+    return databaseList
+ 
+def getSnowflakeSchemas(connectionDetails,database):
+    query = f"select distinct(table_schema) from information_schema.columns where table_catalog = '{database.upper()}' and table_schema != 'INFORMATION_SCHEMA';"
+    df = executeQuery(os.environ.get('SNOWFLAKE'),connectionDetails,query)
+    schemaList = df['TABLE_SCHEMA'].values.tolist()
+    return schemaList
+ 
+def getSnowflakeTables(connectionDetails,database,schema):
+    query = f"select distinct(table_name) from information_schema.tables where table_catalog = '{database.upper()}' and table_schema = '{schema.upper()}' and table_schema != 'INFORMATION_SCHEMA';"
+    df = executeQuery(os.environ.get('SNOWFLAKE'),connectionDetails,query)
+    tableList = df['TABLE_NAME'].values.tolist()
+    return tableList
+ 
+def getSnowflakeColumns(connectionDetails,database,schema,table):
+    query = f"select column_name as columns from {database.lower()}.information_schema.columns where table_catalog = '{database.upper()}' and table_schema = '{schema.upper()}' and table_name = '{table.upper()}' order by ordinal_position;"
+    df = executeQuery('SNOWFLAKE',connectionDetails,query)
+    columnList = df[''].values.tolist()
+    return columnList
+ 
+def getAzureSQLConnection(server,database,username,password,needConnection:bool = False) -> Connection | str:
     driver = os.environ.get('SQL_DRIVER')
     connection = None
     try:
@@ -54,9 +79,9 @@ def createAzureSQLConnection(server,database,username,password,needConnection:bo
     else:
         return connection
     
-def getAzureSqlSchema(connectionDetails,schema,table):
+def getAzureSqlDescription(connectionDetails,schema,table):
     try:   
-        azureConnection = createAzureSQLConnection(connectionDetails.server,connectionDetails.database,connectionDetails.username,connectionDetails.password,True)
+        azureConnection = getAzureSQLConnection(connectionDetails.server,connectionDetails.database,connectionDetails.username,connectionDetails.password,True)
         cursor = azureConnection.cursor()
         cursor.execute(f'''SELECT STRING_AGG(column_info, ',') AS column_data_types FROM (SELECT COLUMN_NAME + ' ' + DATA_TYPE AS column_info FROM INFORMATION_SCHEMA.COLUMNS c INNER JOIN INFORMATION_SCHEMA.TABLES t ON c.TABLE_CATALOG = t.TABLE_CATALOG AND c.TABLE_SCHEMA = t.TABLE_SCHEMA AND c.TABLE_NAME = t.TABLE_NAME WHERE t.TABLE_NAME = '{table}' AND t.TABLE_SCHEMA = '{schema}') AS column_data;''')
         schema = cursor.fetchone()
@@ -64,11 +89,29 @@ def getAzureSqlSchema(connectionDetails,schema,table):
         return schema
     except Exception as e:
         return f"{os.environ.get('SCHEMA_FETCH_ERROR')}. Error: {repr(e)}"
-
-def createQueryFromGemini(query) -> str:
+    
+def getAzureSQLSchemas(connectionDetails):
+    query = f"select name as SCHEMAS from {connectionDetails.database}.sys.schemas where principal_id = 1;"
+    df = executeQuery('AZURE_SQL_SERVER',connectionDetails,query)
+    schemaList = df['SCHEMAS'].values.tolist()
+    return schemaList
+ 
+def getAzureSQLTables(connectionDetails,schema):
+    query = f"select t.name as TABLES from sys.tables t inner join sys.schemas s on t.schema_id = s.schema_id where s.name = '{schema}';"
+    df = executeQuery('AZURE_SQL_SERVER',connectionDetails,query)
+    tableList = df['TABLES'].values.tolist()
+    return tableList
+ 
+def getAzureSQLColumns(connectionDetails,schema,table):
+    query = f"select c.name as COLUMNS from sys.columns c inner join sys.tables t on c.object_id = t.object_id inner join sys.schemas s on t.schema_id = s.schema_id where s.name = '{schema}' and t.name = '{table}';"
+    df = executeQuery('AZURE_SQL_SERVER',connectionDetails,query)
+    columnList = df['COLUMNS'].values.tolist()
+    return columnList
+ 
+def createQueryFromGemini(prompt) -> str:
     genai.configure(api_key=os.environ.get('GOOGLE_API_KEY'))
     model = genai.GenerativeModel('gemini-1.5-pro-latest')
-    response = model.generate_content(f"{query}. Just give me only the query and no other explanation or text.")
+    response = model.generate_content(f"{prompt}. Just give me only the query and no other explanation or text.")
     # Use regular expression to extract the SQL statement
     match = re.search(r"`sql\n(.*?)\n`", response.text, re.DOTALL)
     if match:
@@ -76,15 +119,37 @@ def createQueryFromGemini(query) -> str:
     else:
         # Handle cases where the response doesn't contain the expected format
         return "Unable to extract query from response."
-
+ 
 def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
-    query = f"Give me {os.environ.get('TOTAL_COUNT_VALIDATION')} for the following {os.environ.get(dbProvider)} table.{my_schema}"
-    pass
-
-def executeQuery() -> DataFrame | str:
-    pass
-
+    description = None
+    query = None
+    if(os.environ.get(dbProvider) == 'snowflake'):
+        description = getSnowflakeDescription(connectionDetails,database,schema,table)
+    elif(os.environ.get(dbProvider) == 'azure sql server'):
+        description = getAzureSqlDescription(connectionDetails,schema,table)
+    if(columns != None):
+        query = f"Give me {os.environ.get(check)} for the following columns {", ".join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
+    elif(columns == None):
+        query = f"Give me {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
+    return query
+ 
+def executeQuery(dbProvider,connectionDetails,query):
+    resultDf = None
+    if(os.environ.get(dbProvider) == 'snowflake'):
+        snowflakeSession = getSnowflakeConnection(connectionDetails.account,connectionDetails.user,connectionDetails.password,True)
+        resultObj = snowflakeSession.sql(query)
+        resultDf = resultObj.toPandas()
+        snowflakeSession.close()
+    elif(os.environ.get(dbProvider) == 'azure sql server'):
+        azureConnection = getAzureSQLConnection(connectionDetails.server,connectionDetails.database,connectionDetails.username,connectionDetails.password,True)
+        pd.set_option('display.max_columns',None)
+        pd.set_option('display.max_rows',None)
+        resultDf = pd.read_sql(query,azureConnection)
+        azureConnection.close()
+    return resultDf
+ 
 def validate(dbProvider:str,connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
-    script = createQuery(dbProvider,database,schema,table,check,columns)
-    resultDataframe = executeQuery(dbProvider,connectionDetails,script)
+    prompt = createQuery(dbProvider,database,schema,table,check,columns)
+    query = createQueryFromGemini(prompt)
+    resultDataframe = executeQuery(dbProvider,connectionDetails,query)
     return resultDataframe
