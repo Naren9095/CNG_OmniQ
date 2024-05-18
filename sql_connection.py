@@ -17,11 +17,14 @@ def saving_Cred(server_cred):
                 cred2 = json.load(openfile)
                 # st.write('reading from file')
                 st.write(cred2)
-                cred2['username1']['connections'][server_cred.connection_name] = server_cred
+                st.write(server_cred)
+                connection_name = server_cred['connection_name']
+                cred2['username1']['connections'][connection_name] = server_cred
                 st.write(cred2)
             jsonObj = json.dumps(cred2,indent=3)
             with open(r'/Users/naren/Documents/cred_cng/cred.json','w') as outputfile:
                 outputfile.write(jsonObj)
+            st.success('Saved successfully')
     else:
         cred[server_cred.connection_name] = server_cred
         cred1["connections"] = cred
@@ -30,6 +33,24 @@ def saving_Cred(server_cred):
         jsonObj = json.dumps(cred2,indent=3)
         with open(r'/Users/naren/Documents/cred_cng/cred.json','w') as outputfile:
             outputfile.write(jsonObj)
+        st.success('Saved successfully')
+
+def deleting_Cred(connection_name):
+    if os.path.exists('/Users/naren/Documents/cred_cng/cred.json'):
+            # pass
+            with open(r'/Users/naren/Documents/cred_cng/cred.json','r') as openfile:
+                st.write('file opened')
+                cred2 = json.load(openfile)
+                # st.write('reading from file')
+                st.write(cred2)
+                st.write(connection_name)
+                
+                del cred2['username1']['connections'][connection_name]
+                st.write(cred2)
+            jsonObj = json.dumps(cred2,indent=3)
+            with open(r'/Users/naren/Documents/cred_cng/cred.json','w') as outputfile:
+                outputfile.write(jsonObj)
+            st.error('Deleted Succesfully')
 
 def sql_Server_Conn(user_name,password,server_name,database_name,connection_name):
     driver_name = "{ODBC Driver 18 for SQL Server}"
@@ -63,10 +84,8 @@ def snow_Conn(account,user_name,password,connection_name):
         st.success('Connection is successful')
 
         #Saving the username and password in a Dictionary variable
-        snow_cred = {'account':account,'user_name':user_name,'password':password,'connection_name':connection_name,'type':'Snowflake'}
-        ls_cred.append(snow_cred)
-        cred['username1'] = ls_cred
-        st.write(cred)
+        snow_cred = {"account":account,"user_name":user_name,"password":password,"connection_name":connection_name,"type":"Snowflake"}
+        saving_Cred(snow_cred)
 
     except Exception as e:
         return st.error('Error ',icon='⭕'),st.error(e)
