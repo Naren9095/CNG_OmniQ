@@ -8,12 +8,15 @@ from pyodbc import Connection
 from snowflake.snowpark.session import Session
 from dotenv import load_dotenv
 load_dotenv()
+
+snowflake = os.environ.get('SNOWFLAKE')
+azure_sql_server = os.environ.get('AZURE_SQL_SERVER')
  
-def getSnowflakeConnection(account,user,password,database:str=None,schema:str=None,role:str=None,warehouse:str=None,needConnection:bool = False) -> Session | str:
+def getSnowflakeConnection(account,username,password,database:str=None,schema:str=None,role:str=None,warehouse:str=None,needConnection:bool = False) -> Session | str:
     session = None
     snowflake_conn_prop = {
         "account":account,
-        "user":user,
+        "user":username,
         "password":password
     }
     if(database):
@@ -34,7 +37,7 @@ def getSnowflakeConnection(account,user,password,database:str=None,schema:str=No
  
 def getSnowflakeDescription(connectionDetails,database,schema,table):
     try:
-        snowflakeSession = getSnowflakeConnection(connectionDetails.account,connectionDetails.user,connectionDetails.password,True)
+        snowflakeSession = getSnowflakeConnection(connectionDetails.account,connectionDetails.username,connectionDetails.password,True)
         result = snowflakeSession.sql(f"SELECT GET_DDL('TABLE', '{database}.{schema}.{table}') AS ddl FROM INFORMATION_SCHEMA.TABLES limit 1;").toPandas()['DDL'][0].upper()
         query = result.replace(f"CREATE OR REPLACE TABLE {table.upper()} ",f"{database}.{schema}.{table}")
         snowflakeSession.close()
@@ -128,7 +131,7 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
     elif(os.environ.get(dbProvider) == 'azure sql server'):
         description = getAzureSqlDescription(connectionDetails,schema,table)
     if(columns != None):
-        query = f"Give me {os.environ.get(check)} for the following columns {', '.join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
+        query = f"Give me {os.environ.get(check)} for the following columns {", ".join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
     elif(columns == None):
         query = f"Give me {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
     return query
@@ -136,7 +139,7 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
 def executeQuery(dbProvider,connectionDetails,query):
     resultDf = None
     if(os.environ.get(dbProvider) == 'snowflake'):
-        snowflakeSession = getSnowflakeConnection(connectionDetails.account,connectionDetails.user,connectionDetails.password,True)
+        snowflakeSession = getSnowflakeConnection(connectionDetails.account,connectionDetails.username,connectionDetails.password,True)
         resultObj = snowflakeSession.sql(query)
         resultDf = resultObj.toPandas()
         snowflakeSession.close()
@@ -153,3 +156,25 @@ def validate(dbProvider:str,connectionDetails,database:str,schema:str,table:str,
     query = createQueryFromGemini(prompt)
     resultDataframe = executeQuery(dbProvider,connectionDetails,query)
     return resultDataframe
+
+def getDatabaseList(connectionDetails):
+    if(os.environ.get(connectionDetails.type) == 'snowflake'):
+        return getSnowflakeDatabases(connectionDetails)
+
+def getSchemaList(connectionDetails):
+    if(os.environ.get(connectionDetails.type) == 'azure sql server'):
+        return getAzureSQLSchemas(connectionDetails)
+    elif(os.environ.get(connectionDetails.type) == 'snowflake'):
+        return getSnowflakeSchemas(connectionDetails)
+    
+def getTableList(connectionDetails):
+    if(os.environ.get(connectionDetails.type) == 'azure sql server'):
+        return getAzureSQLTables(connectionDetails)
+    elif(os.environ.get(connectionDetails.type) == 'snowflake'):
+        return getSnowflakeTables(connectionDetails)
+    
+def getColumnList(connectionDetails):
+    if(os.environ.get(connectionDetails.type) == 'azure sql server'):
+        return getAzureSQLColumns(connectionDetails)
+    elif(os.environ.get(connectionDetails.type) == 'snowflake'):
+        return getSnowflakeColumns(connectionDetails)
