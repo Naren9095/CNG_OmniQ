@@ -8,7 +8,7 @@ from pyodbc import Connection
 from snowflake.snowpark.session import Session
 from dotenv import load_dotenv
 load_dotenv()
-
+ 
 snowflake = os.environ.get('SNOWFLAKE')
 azure_sql_server = os.environ.get('AZURE_SQL_SERVER')
  
@@ -37,7 +37,7 @@ def getSnowflakeConnection(account,username,password,database:str=None,schema:st
  
 def getSnowflakeDescription(connectionDetails,database,schema,table):
     try:
-        snowflakeSession = getSnowflakeConnection(connectionDetails.account,connectionDetails.username,connectionDetails.password,True)
+        snowflakeSession = getSnowflakeConnection(connectionDetails['account'],connectionDetails['username'],connectionDetails['password'],True)
         result = snowflakeSession.sql(f"SELECT GET_DDL('TABLE', '{database}.{schema}.{table}') AS ddl FROM INFORMATION_SCHEMA.TABLES limit 1;").toPandas()['DDL'][0].upper()
         query = result.replace(f"CREATE OR REPLACE TABLE {table.upper()} ",f"{database}.{schema}.{table}")
         snowflakeSession.close()
@@ -46,26 +46,26 @@ def getSnowflakeDescription(connectionDetails,database,schema,table):
         return f"{os.environ.get('SCHEMA_FETCH_ERROR')}. Error: {repr(e)}"
     
 def getSnowflakeDatabases(connectionDetails):
-    query = "select database_name from information_schema.databases;"
-    df = executeQuery(connectionDetails.type,connectionDetails,query)
+    query = "show databases;"
+    df = executeQuery(connectionDetails['type'],connectionDetails,query)
     databaseList = df['DATABASE_NAME'].values.tolist()
     return databaseList
  
 def getSnowflakeSchemas(connectionDetails,database):
-    query = f"select distinct(table_schema) from information_schema.columns where table_catalog = '{database.upper()}' and table_schema != 'INFORMATION_SCHEMA';"
-    df = executeQuery(connectionDetails.type,connectionDetails,query)
+    query = f"select distinct(table_schema) from {database.lower()}.information_schema.columns where table_catalog = '{database.upper()}' and table_schema != 'INFORMATION_SCHEMA';"
+    df = executeQuery(connectionDetails['type'],connectionDetails,query)
     schemaList = df['TABLE_SCHEMA'].values.tolist()
     return schemaList
  
 def getSnowflakeTables(connectionDetails,database,schema):
-    query = f"select distinct(table_name) from information_schema.tables where table_catalog = '{database.upper()}' and table_schema = '{schema.upper()}' and table_schema != 'INFORMATION_SCHEMA';"
-    df = executeQuery(connectionDetails.type,connectionDetails,query)
+    query = f"select distinct(table_name) from {database.lower()}.information_schema.tables where table_catalog = '{database.upper()}' and table_schema = '{schema.upper()}' and table_schema != 'INFORMATION_SCHEMA';"
+    df = executeQuery(connectionDetails['type'],connectionDetails,query)
     tableList = df['TABLE_NAME'].values.tolist()
     return tableList
  
 def getSnowflakeColumns(connectionDetails,database,schema,table):
     query = f"select column_name as columns from {database.lower()}.information_schema.columns where table_catalog = '{database.upper()}' and table_schema = '{schema.upper()}' and table_name = '{table.upper()}' order by ordinal_position;"
-    df = executeQuery(connectionDetails.type,connectionDetails,query)
+    df = executeQuery(connectionDetails['type'],connectionDetails,query)
     columnList = df[''].values.tolist()
     return columnList
  
@@ -84,7 +84,7 @@ def getAzureSQLConnection(server,database,username,password,needConnection:bool 
     
 def getAzureSqlDescription(connectionDetails,schema,table):
     try:   
-        azureConnection = getAzureSQLConnection(connectionDetails.server,connectionDetails.database,connectionDetails.username,connectionDetails.password,True)
+        azureConnection = getAzureSQLConnection(connectionDetails['server'],connectionDetails['database'],connectionDetails['username'],connectionDetails['password'],True)
         cursor = azureConnection.cursor()
         cursor.execute(f'''SELECT STRING_AGG(column_info, ',') AS column_data_types FROM (SELECT COLUMN_NAME + ' ' + DATA_TYPE AS column_info FROM INFORMATION_SCHEMA.COLUMNS c INNER JOIN INFORMATION_SCHEMA.TABLES t ON c.TABLE_CATALOG = t.TABLE_CATALOG AND c.TABLE_SCHEMA = t.TABLE_SCHEMA AND c.TABLE_NAME = t.TABLE_NAME WHERE t.TABLE_NAME = '{table}' AND t.TABLE_SCHEMA = '{schema}') AS column_data;''')
         schema = cursor.fetchone()
@@ -94,20 +94,20 @@ def getAzureSqlDescription(connectionDetails,schema,table):
         return f"{os.environ.get('SCHEMA_FETCH_ERROR')}. Error: {repr(e)}"
     
 def getAzureSQLSchemas(connectionDetails):
-    query = f"select name as SCHEMAS from {connectionDetails.database}.sys.schemas where principal_id = 1;"
-    df = executeQuery(connectionDetails.type,connectionDetails,query)
+    query = f"select name as SCHEMAS from {connectionDetails['database']}.sys.schemas where principal_id = 1;"
+    df = executeQuery(connectionDetails['type'],connectionDetails,query)
     schemaList = df['SCHEMAS'].values.tolist()
     return schemaList
  
 def getAzureSQLTables(connectionDetails,schema):
     query = f"select t.name as TABLES from sys.tables t inner join sys.schemas s on t.schema_id = s.schema_id where s.name = '{schema}';"
-    df = executeQuery(connectionDetails.type,connectionDetails,query)
+    df = executeQuery(connectionDetails['type'],connectionDetails,query)
     tableList = df['TABLES'].values.tolist()
     return tableList
  
 def getAzureSQLColumns(connectionDetails,schema,table):
     query = f"select c.name as COLUMNS from sys.columns c inner join sys.tables t on c.object_id = t.object_id inner join sys.schemas s on t.schema_id = s.schema_id where s.name = '{schema}' and t.name = '{table}';"
-    df = executeQuery(connectionDetails.type,connectionDetails,query)
+    df = executeQuery(connectionDetails['type'],connectionDetails,query)
     columnList = df['COLUMNS'].values.tolist()
     return columnList
  
@@ -131,7 +131,7 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
     elif(os.environ.get(dbProvider) == azure_sql_server):
         description = getAzureSqlDescription(connectionDetails,schema,table)
     if(columns != None):
-        query = f"Give me {os.environ.get(check)} for the following columns {", ".join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
+        query = f"Give me {os.environ.get(check)} for the following columns {', '.join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
     elif(columns == None):
         query = f"Give me {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
     return query
@@ -139,12 +139,15 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
 def executeQuery(dbProvider,connectionDetails,query):
     resultDf = None
     if(os.environ.get(dbProvider) == snowflake):
-        snowflakeSession = getSnowflakeConnection(connectionDetails.account,connectionDetails.username,connectionDetails.password,True)
-        resultObj = snowflakeSession.sql(query)
-        resultDf = resultObj.toPandas()
+        snowflakeSession = getSnowflakeConnection(connectionDetails['account'],connectionDetails['username'],connectionDetails['password'],needConnection=True)
+        if(query == 'show databases;'):
+            resultDf = pd.DataFrame(snowflakeSession.sql(query).collect())
+        else:
+            resultObj = snowflakeSession.sql(query)
+            resultDf = resultObj.toPandas()
         snowflakeSession.close()
     elif(os.environ.get(dbProvider) == azure_sql_server):
-        azureConnection = getAzureSQLConnection(connectionDetails.server,connectionDetails.database,connectionDetails.username,connectionDetails.password,True)
+        azureConnection = getAzureSQLConnection(connectionDetails['server'],connectionDetails['database'],connectionDetails['username'],connectionDetails['password'],True)
         pd.set_option('display.max_columns',None)
         pd.set_option('display.max_rows',None)
         resultDf = pd.read_sql(query,azureConnection)
@@ -152,29 +155,29 @@ def executeQuery(dbProvider,connectionDetails,query):
     return resultDf
  
 def validate(connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
-    prompt = createQuery(connectionDetails.type,database,schema,table,check,columns)
+    prompt = createQuery(connectionDetails['type'],database,schema,table,check,columns)
     query = createQueryFromGemini(prompt)
-    resultDataframe = executeQuery(connectionDetails.type,connectionDetails,query)
+    resultDataframe = executeQuery(connectionDetails['type'],connectionDetails,query)
     return resultDataframe
-
+ 
 def getDatabaseList(connectionDetails):
-    if(os.environ.get(connectionDetails.type) == snowflake):
+    if(os.environ.get(connectionDetails['type']) == snowflake):
         return getSnowflakeDatabases(connectionDetails)
-
-def getSchemaList(connectionDetails):
-    if(os.environ.get(connectionDetails.type) == azure_sql_server):
+ 
+def getSchemaList(connectionDetails,database=None):
+    if(os.environ.get(connectionDetails['type']) == azure_sql_server):
         return getAzureSQLSchemas(connectionDetails)
-    elif(os.environ.get(connectionDetails.type) == snowflake):
-        return getSnowflakeSchemas(connectionDetails)
+    elif(os.environ.get(connectionDetails['type']) == snowflake):
+        return getSnowflakeSchemas(connectionDetails,database=database)
     
-def getTableList(connectionDetails):
-    if(os.environ.get(connectionDetails.type) == azure_sql_server):
-        return getAzureSQLTables(connectionDetails)
-    elif(os.environ.get(connectionDetails.type) == snowflake):
-        return getSnowflakeTables(connectionDetails)
+def getTableList(connectionDetails,database:str,schema:str):
+    if(os.environ.get(connectionDetails['type']) == azure_sql_server):
+        return getAzureSQLTables(connectionDetails,schema=schema)
+    elif(os.environ.get(connectionDetails['type']) == snowflake):
+        return getSnowflakeTables(connectionDetails,database=database,schema=schema)
     
-def getColumnList(connectionDetails):
-    if(os.environ.get(connectionDetails.type) == azure_sql_server):
-        return getAzureSQLColumns(connectionDetails)
-    elif(os.environ.get(connectionDetails.type) == snowflake):
-        return getSnowflakeColumns(connectionDetails)
+def getColumnList(connectionDetails,database:str,schema:str,table:str):
+    if(os.environ.get(connectionDetails['type']) == azure_sql_server):
+        return getAzureSQLColumns(connectionDetails,schema=schema,table=table)
+    elif(os.environ.get(connectionDetails['type']) == snowflake):
+        return getSnowflakeColumns(connectionDetails,database=database,schema=schema,table=table)
