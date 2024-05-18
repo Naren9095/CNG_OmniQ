@@ -1,6 +1,7 @@
 import streamlit as st
 import sys
 import json
+import os
 from dotenv import load_dotenv
 sys.path.append('../')
 from dqFunc import *
@@ -24,6 +25,9 @@ else:
     st.error("No Existing Connections Found!")
 
 def data_source_form(check_type):
+
+    source_connection=source_database=source_schema=source_table=None
+
     st.header(check_type)
     if check_type == "Data Validation":
         st.header("Select Source")
@@ -36,15 +40,17 @@ def data_source_form(check_type):
             if source_schema:
                 source_table_options = (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=source_database,schema=source_schema)) if source_connection!='' and source_database!='' and source_schema!='' and connection_credentials[USERNAME]['connections'][source_connection]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=connection_credentials[USERNAME]['connections'][source_connection]['database'],schema=source_schema))
                 source_table = st.selectbox('Select Table',source_table_options,key='source_table_button_'+check_type)
-                if source_table:
-                    checks_list(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=source_database,schema=source_schema,table=source_table)
         submit_button = st.button("Validate",key='source_validate_button_'+check_type)
         if submit_button:
             st.session_state['source_validation'][check_type] = 'validation_result_1'
             st.success("Data validated 'validation_result_1'!")
         if 'source_validation' in st.session_state and check_type in st.session_state['source_validation']:
             st.write(f"Source validation result for {check_type}: {st.session_state['source_validation'][check_type]}")
+        if source_connection and source_database and source_schema and source_table:
+            checks_list(check_type=check_type,source_connection_details=connection_credentials[USERNAME]['connections'][source_connection],source_database=source_database,source_schema=source_schema,source_table=source_table)
     else:
+        source_connection=source_database=source_schema=source_table=None
+        target_connection=target_database=target_schema=target_table=None
         col1, col2 = st.columns(2)
         with col1:
             st.header("Select Source")
@@ -57,8 +63,6 @@ def data_source_form(check_type):
                 if source_schema:
                     source_table_options = (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=source_database,schema=source_schema)) if source_connection!='' and source_database!='' and source_schema!='' and connection_credentials[USERNAME]['connections'][source_connection]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=connection_credentials[USERNAME]['connections'][source_connection]['database'],schema=source_schema))
                     source_table = st.selectbox('Select Table',source_table_options,key='source_table_button_'+check_type)
-                    if source_table:
-                        checks_list(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=source_database,schema=source_schema,table=source_table)
             source_submit_button = st.button("Validate",key='source_validate_button_'+check_type)
             if source_submit_button:
                 st.session_state['source_reconciliation'][check_type] = 'reconciliation_result_1'
@@ -74,8 +78,7 @@ def data_source_form(check_type):
                 if target_schema:
                     target_table_options = (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][target_connection],database=target_database,schema=target_schema)) if target_connection!='' and target_database!='' and target_schema!='' and connection_credentials[USERNAME]['connections'][target_connection]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][target_connection],database=connection_credentials[USERNAME]['connections'][target_connection]['database'],schema=target_schema))
                     target_table = st.selectbox('Select Table',target_table_options,key='target_table_button_'+check_type)
-                    if target_table:
-                        checks_list(connectionDetails=connection_credentials[USERNAME]['connections'][target_connection],database=target_database,schema=target_schema,table=target_table)
+                    
             target_submit_button = st.button("Validate",key='target_validate_button_'+check_type)
             
             if target_submit_button:
@@ -87,3 +90,6 @@ def data_source_form(check_type):
 
         if 'target_reconciliation' in st.session_state and check_type in st.session_state['target_reconciliation']:
             col2.write(f"Target validation result for {check_type}: {st.session_state['target_reconciliation'][check_type]}")
+        
+        if source_connection and source_database and source_schema and source_table and target_connection and target_database and target_schema and target_table:
+            checks_list(check_type=check_type,source_connection_details=connection_credentials[USERNAME]['connections'][source_connection],source_database=source_database,source_schema=source_schema,source_table=source_table,target_connection_details=connection_credentials[USERNAME]['connections'][target_connection],target_database=target_database,target_schema=target_schema,target_table=target_table)

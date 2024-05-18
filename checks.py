@@ -1,7 +1,16 @@
-import streamlit as st;
+import streamlit as st
+from dotenv import load_dotenv
+import sys
+import os
+sys.path.append('../')
+from dqFunc import getAzureSQLColumns,getSnowflakeColumns,validate
+load_dotenv()
 
-def checks_list(connectionDetails=None,database=None,schema=None,table=None,type=None):
-    st.title(type)
+TYPE_SNOWFLAKE = os.getenv("TYPE_SNOWFLAKE")
+TYPE_AZURE_SQL_SERVER = os.getenv("TYPE_AZURE_SQL_SERVER")
+
+def checks_list(source_connection_details=None,source_database=None,source_schema=None,source_table=None,check_type=None,target_connection_details=None,target_database=None,target_schema=None,target_table=None):
+    st.title(check_type)
     styles = """
         <style>
             [data-testid="stHorizontalBlock"], [data-testid="stMultiSelect"] {
@@ -22,9 +31,9 @@ def checks_list(connectionDetails=None,database=None,schema=None,table=None,type
         "Length/size of column check": False,
         "In set check": False
     }
-
+    
     listOfTableColumns = {
-        "SourceColumns": ["Spider", "Captain", "Black"],
+        "SourceColumns": getSnowflakeColumns(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table) if source_connection_details['type'] != TYPE_AZURE_SQL_SERVER else getAzureSQLColumns(connectionDetails=source_connection_details,schema=source_schema,table=source_table),
         "TargetColumns": ["Super", "Bat", "Wonder", "knk"]
     }
 
@@ -33,7 +42,7 @@ def checks_list(connectionDetails=None,database=None,schema=None,table=None,type
 
     st.markdown(styles, unsafe_allow_html=True)
     st.header("Perform Checks")
-    qualityCheckType = st.selectbox("Choose your Quality Check selection Type", ("Data Validation", "Data Reconcilation"))
+    qualityCheckType = check_type
     mappedSourceToTargetColumns = {}
     checks_where_columns_not_needed = ("Count check", "Schema check")
     checks_where_columns_mapping_not_needed = ("Aggregation check")

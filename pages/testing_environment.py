@@ -25,9 +25,9 @@ SNOWFLAKE_CONNECTION = {
         "type": "SNOWFLAKE"
       }
 
-# For AZURE
-checks_list(connectionDetails=AZURE_CONNECTION,database=AZURE_CONNECTION["database"],schema="dbo",table="youtube_channel",type="AZURE SQL CONN")
+#DATA VALIDATION
+checks_list(source_connection_details=AZURE_CONNECTION,source_database=AZURE_CONNECTION["database"],source_schema="dbo",source_table="youtube_channel",check_type="Data Validation")
 
 
-# # FOR SNOWFLAKE
-# checks_list(connectionDetails=SNOWFLAKE_CONNECTION,database="OMNIQ",schema="RAW",table="YOUTUBE",type="SNOWFLAKE")
+#RECONCILIATION
+# checks_list(check_type="Data Reconciliation",source_connection_details=AZURE_CONNECTION,source_database=AZURE_CONNECTION["database"],source_schema="dbo",source_table="youtube_channel",target_connection_details=SNOWFLAKE_CONNECTION,target_database="OMNIQ",target_schema="RAW",target_table="YOUTUBE")
