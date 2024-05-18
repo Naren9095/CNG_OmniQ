@@ -48,7 +48,7 @@ def getSnowflakeDescription(connectionDetails,database,schema,table):
 def getSnowflakeDatabases(connectionDetails):
     query = "show databases;"
     df = executeQuery(connectionDetails['type'],connectionDetails,query)
-    databaseList = df['DATABASE_NAME'].values.tolist()
+    databaseList = df['name'].values.tolist()
     return databaseList
  
 def getSnowflakeSchemas(connectionDetails,database):
