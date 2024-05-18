@@ -1,0 +1,27 @@
+{
+  "username1": {
+    "connections": {
+      "sql_Server_conn_new": {
+        "username": "OmniQSuite",
+        "password": "DataQuality@#123",
+        "server": "omniqsuiteserver.database.windows.net",
+        "database": "testOmniQSuite",
+        "type": "AZURE_SQL_SERVER"
+      },
+      "snow_new_connection_newest_newest": {
+        "account": "zaagbib-tv78389",
+        "username": "gddvdata",
+        "password": "Gddvdata1",
+        "connection": "snow_new_connection_newest_newest",
+        "type": "SNOWFLAKE"
+      },
+      "snow_new_new_12345": {
+        "account": "zaagbib-tv78389",
+        "username": "gddvdata",
+        "password": "Gddvdata1",
+        "connection": "snow_new_new_12345",
+        "type": "SNOWFLAKE"
+      }
+    }
+  }
+}

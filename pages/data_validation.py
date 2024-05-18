@@ -6,7 +6,7 @@ st.title("Data Quality")
 page_names = ["Data Validation", "Data Reconciliation"]
 page = st.selectbox("Select ", page_names)
 
-data_source_form(type=page)
+data_source_form(check_type=page)
 st.empty()
 
 sidebar_style = """
