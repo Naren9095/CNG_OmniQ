@@ -1,6 +1,11 @@
-SNOWFLAKE_ACCOUNT='zaagbib-tv78389'
-SNOWFLAKE_USER='gddvdata'
-SNOWFLAKE_PASSWORD='Gddvdata1'
+# SNOWFLAKE_ACCOUNT='zaagbib-tv78389'
+# SNOWFLAKE_USER='gddvdata'
+# SNOWFLAKE_PASSWORD='Gddvdata1'
+# SNOWFLAKE_WAREHOUSE='COMPUTE_WH'
+
+SNOWFLAKE_ACCOUNT='fvrfaye-rl30738'
+SNOWFLAKE_USER='cngdata'
+SNOWFLAKE_PASSWORD='Cngdata@#123'
 SNOWFLAKE_WAREHOUSE='COMPUTE_WH'
 
 snowflake_conn_prop = {
@@ -8,3 +13,5 @@ snowflake_conn_prop = {
 "user":SNOWFLAKE_USER,
 "password":SNOWFLAKE_PASSWORD
 }
+
+
