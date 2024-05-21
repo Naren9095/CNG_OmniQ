@@ -2,6 +2,7 @@ import streamlit as st
 from dotenv import load_dotenv
 import sys
 import os
+import pandas as pd
 sys.path.append('../')
 from dqFunc import getAzureSQLColumns,getSnowflakeColumns,validate
 load_dotenv()
@@ -46,17 +47,32 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     mappedSourceToTargetColumns = {}
     checks_where_columns_not_needed = ("Count check", "Schema check")
     checks_where_columns_mapping_not_needed = ("Aggregation check")
+    # data_df = None;
     st.header("Select the Checks to perform")
+
+    def storeMappedValues(data_df, mappedSourceToTargetColumns):
+        sourceColumns = data_df["Map Source Columns"].tolist();
+        targetColumns = data_df["Map Target Columns"].tolist();
+
+        # mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
+        print("sourceColumns: ", sourceColumns);
+        print("targetColumns: ", targetColumns);
+    
+    def upperAndReplace(checkStr):
+        return checkStr.upper().replace(' ', '_');
+
     for check in listOfChecks.keys():
+        # check = check.upper().replace(' ', '_');
         listOfChecks[check] = st.checkbox(check)
         if(check not in checks_where_columns_not_needed):
+             # check = check.upper().replace(' ', '_');
             mappedSourceColumns = []
             mappedTargetColumns = []
             match qualityCheckType:
                 case "Data Validation":
                     if(listOfChecks[check]):
                         options = st.multiselect("Choose the necessary columns to perform checks", listOfTableColumns["SourceColumns"], key=check)
-                        listOfChecksColumnsList[check] = options
+                        listOfChecksColumnsList[upperAndReplace(check)] = options
                 case "Data Reconciliation":
                     if(listOfChecks[check]):
                         if(check not in checks_where_columns_mapping_not_needed):
@@ -77,8 +93,10 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                                                                     index=None, key=check+"col2""_"+str(i), label_visibility="collapsed", 
                                                                     placeholder="Choose Target Column")
                                     mappedTargetColumns.append(targetColumnName)
-                            
-                            mappedSourceToTargetColumns[check] = {"SourceColumns": mappedSourceColumns, "TargetColumns": mappedTargetColumns}
+
+                            mappedColumns = dict(zip(mappedSourceColumns, mappedTargetColumns));
+                            filteredMappedColumns = {k: v for k, v in mappedColumns.items() if v is not None}
+                            mappedSourceToTargetColumns[upperAndReplace(check)] = filteredMappedColumns
                         else:
                             col1, col2 = st.columns(2)
                             with col1:                       
@@ -89,11 +107,60 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                                 targetColumns = st.multiselect("Choose necessary Target Columns", listOfTableColumns["TargetColumns"],
                                                                     key=check+"col", placeholder="Choose Target Columns")
                                 
-                            mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
+                            mappedSourceToTargetColumns[upperAndReplace(check)] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
 
+
+                    # if(listOfChecks[check]):
+                    #     data_df = pd.DataFrame(
+                    #         {
+                    #             "Map Source Columns": [],
+                    #             "Map Target Columns": []
+
+                    #         }
+                    #     )
+
+                    #     mappedColumns = st.data_editor(
+                    #         data_df,
+                    #         column_config={
+                    #            "Map Source Columns": st.column_config.SelectboxColumn(
+                    #                 "Map Source Columns",
+                    #                 width="medium",
+                    #                 options=listOfTableColumns["SourceColumns"],
+                    #                 required=True,
+                    #             ),
+                    #              "Map Target Columns": st.column_config.SelectboxColumn(
+                    #                 "Map Target Columns",
+                    #                 width="medium",
+                    #                 options=listOfTableColumns["TargetColumns"],
+                    #                 required=True,
+                    #             )
+                    #         },
+                    #         hide_index=True,
+                    #         num_rows="dynamic",
+                    #         key=check,
+                    #         width=1000,
+                    #         on_change = storeMappedValues(data_df, mappedSourceToTargetColumns)
+                    #     )
+
+                    #     st.write(mappedColumns);
+
+                        # sourceColumns = data_df["Map Source Columns"].tolist();
+                        # targetColumns = data_df["Map Target Columns"].tolist();
+
+                        # mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
+        else:
+            match qualityCheckType:
+                case "Data Validation":
+                    if(listOfChecks[check]):
+                        listOfChecksColumnsList[upperAndReplace(check)] = [];
+                case "Data Reconciliation":
+                    if(listOfChecks[check]):
+                        mappedSourceToTargetColumns[upperAndReplace(check)] = {};
 
     st.header("Results:")
     st.write(listOfChecksColumnsList)
+    st.write(mappedSourceToTargetColumns);
+
 
     st.write(mappedSourceToTargetColumns)
     print(mappedSourceToTargetColumns)
