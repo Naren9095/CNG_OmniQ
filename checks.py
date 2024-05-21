@@ -161,3 +161,6 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     st.write(listOfChecksColumnsList)
     st.write(mappedSourceToTargetColumns);
 
+
+    st.write(mappedSourceToTargetColumns)
+    print(mappedSourceToTargetColumns)
