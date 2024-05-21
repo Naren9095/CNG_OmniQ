@@ -90,10 +90,11 @@ def getAzureSqlDescription(connectionDetails,schema,table):
         azureConnection = getAzureSQLConnection(server=connectionDetails['server'],database=connectionDetails['database'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
         cursor = azureConnection.cursor()
         cursor.execute(f'''SELECT STRING_AGG(column_info, ',') AS column_data_types FROM (SELECT COLUMN_NAME + ' ' + DATA_TYPE AS column_info FROM INFORMATION_SCHEMA.COLUMNS c INNER JOIN INFORMATION_SCHEMA.TABLES t ON c.TABLE_CATALOG = t.TABLE_CATALOG AND c.TABLE_SCHEMA = t.TABLE_SCHEMA AND c.TABLE_NAME = t.TABLE_NAME WHERE t.TABLE_NAME = '{table}' AND t.TABLE_SCHEMA = '{schema}') AS column_data;''')
-        schema = cursor.fetchone()
+        description = cursor.fetchone()
+        query = ''+schema + '.' + table + '(' + description[0] + ')'
         azureConnection.close()
-        print(schema)
-        return schema
+        print(query)
+        return query
     except Exception as e:
         return f"{os.environ.get('SCHEMA_FETCH_ERROR')}. Error: {repr(e)}"
     
@@ -139,7 +140,7 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
     if(columns != None):
         query = f"Give me {os.environ.get(check)} for the following columns {', '.join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
     elif(columns == None):
-        query = f"Give me {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
+        query = f"Give me one query for {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
     print(query)
     return query
  
@@ -156,7 +157,7 @@ def executeQuery(dbProvider,connectionDetails,query):
     elif(os.environ.get(dbProvider) == azure_sql_server):
         azureConnection = getAzureSQLConnection(server=connectionDetails['server'],database=connectionDetails['database'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
         pd.set_option('display.max_columns',None)
-        pd.set_option('display.max_rows',None)
+        # pd.set_option('display.max_rows',None)
         resultDf = pd.read_sql(query,azureConnection)
         azureConnection.close()
     return resultDf
