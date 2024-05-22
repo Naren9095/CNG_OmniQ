@@ -11,7 +11,6 @@ TYPE_SNOWFLAKE = os.getenv("TYPE_SNOWFLAKE")
 TYPE_AZURE_SQL_SERVER = os.getenv("TYPE_AZURE_SQL_SERVER")
 
 def checks_list(source_connection_details=None,source_database=None,source_schema=None,source_table=None,check_type=None,target_connection_details=None,target_database=None,target_schema=None,target_table=None):
-    st.title(check_type)
     styles = """
         <style>
             [data-testid="stHorizontalBlock"], [data-testid="stMultiSelect"] {
@@ -26,9 +25,9 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
         "Schema check": False,
         "Duplicate check": False,
         "Aggregation check": False,
-        "Trailing/Leading spaces check": False,
+        "Trailing and Leading spaces check": False,
         "Pattern check": False,
-        "Length/size of column check": False,
+        "Length or size of column check": False,
         "In set check": False
     }
     

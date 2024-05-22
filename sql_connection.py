@@ -24,7 +24,7 @@ def saving_Cred(server_cred):
             jsonObj = json.dumps(cred2,indent=3)
             with open(r'./cred.json','w') as outputfile:
                 outputfile.write(jsonObj)
-            st.success('Saved successfully')
+            st.toast('Saved successfully')
     else:
         # st.write('new file creation')
         cr = server_cred['connection_name']
@@ -34,7 +34,7 @@ def saving_Cred(server_cred):
         jsonObj = json.dumps(cred2,indent=3)
         with open(r'./cred.json','w') as outputfile:
             outputfile.write(jsonObj)
-        st.success('Saved successfully')
+        st.toast('Saved successfully')
 
 def deleting_Cred(connection_name):
     cred2 = {}
@@ -52,7 +52,7 @@ def deleting_Cred(connection_name):
             jsonObj = json.dumps(cred2,indent=3)
             with open(r'./cred.json','w') as outputfile:
                 outputfile.write(jsonObj)
-            st.error('Deleted Succesfully')
+            st.toast('Deleted Succesfully')
 
 def sql_Server_Conn(user_name,password,server_name,database_name,connection_name):
     driver_name = "{ODBC Driver 18 for SQL Server}"
@@ -66,7 +66,7 @@ def sql_Server_Conn(user_name,password,server_name,database_name,connection_name
         st.success('Connection is successful')
 
         #Saving the username and password in a Dictionary variable
-        sql_server_cred = {"user_name":user_name,"password":password,"server_name":server_name,"database_name":database_name,"type":"AZURE_SQL_SERVER","connection_name":connection_name}
+        sql_server_cred = {"username":user_name,"password":password,"server":server_name,"database":database_name,"type":"AZURE_SQL_SERVER","connection_name":connection_name}
 
         saving_Cred(sql_server_cred)
         # return sql_server_cred
@@ -86,7 +86,7 @@ def snow_Conn(account,user_name,password,connection_name):
         st.success('Connection is successful')
 
         #Saving the username and password in a Dictionary variable
-        snow_cred = {"account":account,"user_name":user_name,"password":password,"connection_name":connection_name,"type":"SNOWFLAKE"}
+        snow_cred = {"account":account,"username":user_name,"password":password,"connection_name":connection_name,"type":"SNOWFLAKE"}
         saving_Cred(snow_cred)
 
     except Exception as e:

@@ -15,7 +15,7 @@ def newConn():
     st.markdown("### Create a Connection")
 
     #Selecting a Connection
-    DataSource = st.selectbox('select a DataSource',['SQLSERVER','MYSQL','SNOWFLAKE'])
+    DataSource = st.selectbox('select a DataSource',['SQLSERVER','SNOWFLAKE'])
     st.markdown('####')
     st.markdown('####')
 
@@ -54,10 +54,11 @@ with top_container:
             st.markdown('####')
 
             # st.write(cred2['username1']['connections'][conn])
-            connection_name = cred2['username1']['connections'][conn]
-            if connection_name['type'] == 'AZURE_SQL_SERVER':
-                sql_Server_Cred(user_name=connection_name['user_name'],password=connection_name['password'],server_name=connection_name['server_name'],database_name=connection_name['database_name'],connection_name=conn,connection_from='existing_connection')
-            if connection_name['type'] == 'SNOWFLAKE':
-                snow_Cred(account=connection_name['account'],user_name=connection_name['user_name'],password=connection_name['password'],connection_name=conn,connection_from='existing_connection')
+            if cred2['username1'].get('connections') and cred2['username1']['connections'].get(conn):
+                connection_name = cred2['username1']['connections'][conn]
+                if connection_name['type'] == 'AZURE_SQL_SERVER':
+                    sql_Server_Cred(user_name=connection_name['username'],password=connection_name['password'],server_name=connection_name['server'],database_name=connection_name['database'],connection_name=conn,connection_from='existing_connection')
+                if connection_name['type'] == 'SNOWFLAKE':
+                    snow_Cred(account=connection_name['account'],user_name=connection_name['username'],password=connection_name['password'],connection_name=conn,connection_from='existing_connection')
         else:
             st.error('No Existing Connections. Create a Connection first')

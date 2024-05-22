@@ -17,7 +17,7 @@ def sql_Server_Cred(user_name, password, server_name, database_name, connection_
             deleted = form_col2.form_submit_button('Delete',type='primary',use_container_width=True)
             if deleted:
                 deleting_Cred(connection_name)
-        if submitted:
+        if submitted and user_name and password and server_name and database_name and connection_name:
             succ_error = sql_Server_Conn(user_name=user_name,password = password,server_name=server_name,database_name=database_name,connection_name=connection_name)
             return succ_error
         
@@ -42,6 +42,6 @@ def snow_Cred(account,user_name,password,connection_name,connection_from):
             deleted = form_col2.form_submit_button('Delete',type='primary',use_container_width=True)
             if deleted:
                 deleting_Cred(connection_name)
-        if submitted:
+        if submitted and account and user_name and password and connection_name:
             succ_error = snow_Conn(account=account,user_name=user_name,password=password,connection_name=connection_name)
             return succ_error
