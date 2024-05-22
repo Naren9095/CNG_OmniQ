@@ -12,6 +12,8 @@ load_dotenv()
  
 snowflake = os.environ.get('SNOWFLAKE')
 azure_sql_server = os.environ.get('AZURE_SQL_SERVER')
+type_azure_sql_server = os.environ.get('TYPE_AZURE_SQL_SERVER')
+type_snowflake_server = os.environ.get('TYPE_SNOWFLAKE')
  
 def getSnowflakeConnection(account,username,password,database:str=None,schema:str=None,role:str=None,warehouse:str=None,needConnection:bool = False) -> Session | str:
     session = None
@@ -157,14 +159,14 @@ def executeQuery(dbProvider,connectionDetails,query):
     return resultDf
  
 def validate(connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
-    # st.write(f"{check} validate is called")
-    # print('Received Columns : ',columns)
+    st.write(f"{check} validate is called")
+    print('Received Columns : ',columns)
     prompt = createQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,database=database,schema=schema,table=table,check=check,columns=columns)
-    # print('prompt is ',prompt)
+    print('prompt is ',prompt)
     query = createQueryFromGemini(prompt=prompt)
-    # print('query from gemini is ',query)
+    print('query from gemini is ',query)
     resultDataframe = executeQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,query=query)
-    # print(resultDataframe,' inside Validate')
+    print(resultDataframe,' inside Validate')
     return resultDataframe
  
 def getDatabaseList(connectionDetails):
@@ -189,3 +191,10 @@ def getColumnList(connectionDetails,database:str,schema:str,table:str):
     elif(os.environ.get(connectionDetails['type']) == snowflake):
         return getSnowflakeColumns(connectionDetails=connectionDetails,database=database,schema=schema,table=table)
  
+def getDataPreview(connectionDetails,database,schema,table):
+    if connectionDetails['type'] == type_azure_sql_server:
+        query = f"SELECT TOP(10) * FROM {schema}.{table};"
+    else:
+        query = f"SELECT * from {database+'.' if database else ''}{schema}.{table} limit 10;"
+    resultDf = executeQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,query=query)
+    return resultDf
