@@ -6,6 +6,7 @@ from pandas import DataFrame
 import pyodbc as pyodbc
 from pyodbc import Connection
 from snowflake.snowpark.session import Session
+import streamlit as st
 from dotenv import load_dotenv
 load_dotenv()
  
@@ -38,11 +39,9 @@ def getSnowflakeConnection(account,username,password,database:str=None,schema:st
 def getSnowflakeDescription(connectionDetails,database,schema,table):
     try:
         snowflakeSession = getSnowflakeConnection(account=connectionDetails['account'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
-        print(f"SELECT GET_DDL('TABLE', '{database}.{schema}.{table}') AS ddl FROM INFORMATION_SCHEMA.TABLES limit 1;")
         result = snowflakeSession.sql(f"SELECT GET_DDL('TABLE', '{database}.{schema}.{table}') AS ddl FROM {database.upper()}.INFORMATION_SCHEMA.TABLES limit 1;").toPandas()['DDL'][0].upper()
         query = result.replace(f"CREATE OR REPLACE TABLE {table.upper()} ",f"{database}.{schema}.{table}")
         snowflakeSession.close()
-        print(query)
         return query
     except Exception as e:
         return f"{os.environ.get('SCHEMA_FETCH_ERROR')}. Error: {repr(e)}"
@@ -68,7 +67,6 @@ def getSnowflakeTables(connectionDetails,database,schema):
 def getSnowflakeColumns(connectionDetails,database,schema,table):
     query = f"select column_name as columns from {database.lower()}.information_schema.columns where table_catalog = '{database.upper()}' and table_schema = '{schema.upper()}' and table_name = '{table.upper()}' order by ordinal_position;"
     df = executeQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,query=query)
-    print(df)
     columnList = df['COLUMNS'].values.tolist()
     return columnList
  
@@ -93,7 +91,6 @@ def getAzureSqlDescription(connectionDetails,schema,table):
         description = cursor.fetchone()
         query = ''+schema + '.' + table + '(' + description[0] + ')'
         azureConnection.close()
-        print(query)
         return query
     except Exception as e:
         return f"{os.environ.get('SCHEMA_FETCH_ERROR')}. Error: {repr(e)}"
@@ -124,7 +121,6 @@ def createQueryFromGemini(prompt) -> str:
     match = re.search(r"`sql\n(.*?)\n`", response.text, re.DOTALL)
     if match:
         query = match.group(1).strip()
-        print(query)
         return query  # Extract group 1 (the SQL statement) and remove leading/trailing whitespace
     else:
         # Handle cases where the response doesn't contain the expected format
@@ -141,7 +137,6 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
         query = f"Give me {os.environ.get(check)} for the following columns {', '.join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
     elif(columns == None):
         query = f"Give me one query for {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
-    print(query)
     return query
  
 def executeQuery(dbProvider,connectionDetails,query):
@@ -157,15 +152,19 @@ def executeQuery(dbProvider,connectionDetails,query):
     elif(os.environ.get(dbProvider) == azure_sql_server):
         azureConnection = getAzureSQLConnection(server=connectionDetails['server'],database=connectionDetails['database'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
         pd.set_option('display.max_columns',None)
-        # pd.set_option('display.max_rows',None)
         resultDf = pd.read_sql(query,azureConnection)
         azureConnection.close()
     return resultDf
  
 def validate(connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
+    # st.write(f"{check} validate is called")
+    # print('Received Columns : ',columns)
     prompt = createQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,database=database,schema=schema,table=table,check=check,columns=columns)
+    # print('prompt is ',prompt)
     query = createQueryFromGemini(prompt=prompt)
+    # print('query from gemini is ',query)
     resultDataframe = executeQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,query=query)
+    # print(resultDataframe,' inside Validate')
     return resultDataframe
  
 def getDatabaseList(connectionDetails):
@@ -189,3 +188,4 @@ def getColumnList(connectionDetails,database:str,schema:str,table:str):
         return getAzureSQLColumns(connectionDetails=connectionDetails,schema=schema,table=table)
     elif(os.environ.get(connectionDetails['type']) == snowflake):
         return getSnowflakeColumns(connectionDetails=connectionDetails,database=database,schema=schema,table=table)
+ 

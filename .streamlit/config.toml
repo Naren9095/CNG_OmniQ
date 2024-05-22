@@ -1,0 +1,6 @@
+[client]
+showErrorDetails = false
+showSidebarNavigation = true
+
+[server]
+maxMessageSize = 1024

@@ -15,7 +15,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     styles = """
         <style>
             [data-testid="stHorizontalBlock"], [data-testid="stMultiSelect"] {
-                margin-left: 30px;
+                margin-left: 30px
             }
         </style>
     """
@@ -26,7 +26,6 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
         "Schema check": False,
         "Duplicate check": False,
         "Aggregation check": False,
-        "Data type check": False,
         "Trailing/Leading spaces check": False,
         "Pattern check": False,
         "Length/size of column check": False,
@@ -47,25 +46,23 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     mappedSourceToTargetColumns = {}
     checks_where_columns_not_needed = ("Count check", "Schema check")
     checks_where_columns_mapping_not_needed = ("Aggregation check")
-    # data_df = None;
+    # data_df = None
     st.header("Select the Checks to perform")
 
-    def storeMappedValues(data_df, mappedSourceToTargetColumns):
-        sourceColumns = data_df["Map Source Columns"].tolist();
-        targetColumns = data_df["Map Target Columns"].tolist();
+    # def storeMappedValues(data_df, mappedSourceToTargetColumns):
+    #     sourceColumns = data_df["Map Source Columns"].tolist()
+    #     targetColumns = data_df["Map Target Columns"].tolist()
 
-        # mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
-        print("sourceColumns: ", sourceColumns);
-        print("targetColumns: ", targetColumns);
+    #     # mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
+    #     print("sourceColumns: ", sourceColumns)
+    #     print("targetColumns: ", targetColumns)
     
     def upperAndReplace(checkStr):
-        return checkStr.upper().replace(' ', '_');
+        return checkStr.upper().replace(' ', '_')
 
     for check in listOfChecks.keys():
-        # check = check.upper().replace(' ', '_');
         listOfChecks[check] = st.checkbox(check)
         if(check not in checks_where_columns_not_needed):
-             # check = check.upper().replace(' ', '_');
             mappedSourceColumns = []
             mappedTargetColumns = []
             match qualityCheckType:
@@ -94,7 +91,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                                                                     placeholder="Choose Target Column")
                                     mappedTargetColumns.append(targetColumnName)
 
-                            mappedColumns = dict(zip(mappedSourceColumns, mappedTargetColumns));
+                            mappedColumns = dict(zip(mappedSourceColumns, mappedTargetColumns))
                             filteredMappedColumns = {k: v for k, v in mappedColumns.items() if v is not None}
                             mappedSourceToTargetColumns[upperAndReplace(check)] = filteredMappedColumns
                         else:
@@ -142,25 +139,36 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                     #         on_change = storeMappedValues(data_df, mappedSourceToTargetColumns)
                     #     )
 
-                    #     st.write(mappedColumns);
+                    #     st.write(mappedColumns)
 
-                        # sourceColumns = data_df["Map Source Columns"].tolist();
-                        # targetColumns = data_df["Map Target Columns"].tolist();
+                        # sourceColumns = data_df["Map Source Columns"].tolist()
+                        # targetColumns = data_df["Map Target Columns"].tolist()
 
                         # mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
         else:
             match qualityCheckType:
                 case "Data Validation":
                     if(listOfChecks[check]):
-                        listOfChecksColumnsList[upperAndReplace(check)] = [];
+                        listOfChecksColumnsList[upperAndReplace(check)] = []
                 case "Data Reconciliation":
                     if(listOfChecks[check]):
-                        mappedSourceToTargetColumns[upperAndReplace(check)] = {};
+                        mappedSourceToTargetColumns[upperAndReplace(check)] = {}
 
-    st.header("Results:")
-    st.write(listOfChecksColumnsList)
-    st.write(mappedSourceToTargetColumns);
+    resultContainer = st.container()
 
+    def execute_queries_for_checks():
+        for check in listOfChecksColumnsList.keys():
+            if listOfChecksColumnsList[check] != []:
+                result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check,columns=listOfChecksColumnsList[check])
+            else:
+                result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check)      
+            with resultContainer:
+                st.header(check.replace('_',' '))
+                st.write(result_df)
 
-    st.write(mappedSourceToTargetColumns)
-    print(mappedSourceToTargetColumns)
+    # st.write(listOfChecksColumnsList)
+    # st.write(listOfChecks)
+
+    st.button("Validate",key=f"{check_type}_validation_button",on_click=execute_queries_for_checks)
+ 
+    
