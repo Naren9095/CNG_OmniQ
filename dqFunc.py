@@ -145,7 +145,9 @@ def executeQuery(dbProvider,connectionDetails,query):
     resultDf = None
     if(os.environ.get(dbProvider) == snowflake):
         snowflakeSession = getSnowflakeConnection(account=connectionDetails['account'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
+        print(snowflakeSession, ' is returned snowflake session')
         if(query == 'show databases;'):
+            print(query,' is query')
             resultDf = pd.DataFrame(snowflakeSession.sql(query).collect())
         else:
             resultObj = snowflakeSession.sql(query)
