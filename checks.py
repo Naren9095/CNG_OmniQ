@@ -4,7 +4,7 @@ import sys
 import os
 import pandas as pd
 sys.path.append('../')
-from dqFunc import getAzureSQLColumns,getSnowflakeColumns,validate
+from dqFunc import getAzureSQLColumns, getSnowflakeColumns, validate
 load_dotenv()
 
 TYPE_SNOWFLAKE = os.getenv("TYPE_SNOWFLAKE")
@@ -156,18 +156,44 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     resultContainer = st.container()
 
     def execute_queries_for_checks():
-        for check in listOfChecksColumnsList.keys():
-            if listOfChecksColumnsList[check] != []:
-                result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check,columns=listOfChecksColumnsList[check])
-            else:
-                result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check)      
+        if check_type == "Data Validation":
+            for check in listOfChecksColumnsList.keys():
+                print(listOfChecksColumnsList[check],' is th crnt chk')
+                if listOfChecksColumnsList[check] != []:
+                    result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check,columns=listOfChecksColumnsList[check])
+                else:
+                    result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check)      
+                with resultContainer:
+                    st.header(check.replace('_',' '))
+                    st.write(result_df)
+        else:
             with resultContainer:
-                st.header(check.replace('_',' '))
-                st.write(result_df)
+                print(mappedSourceToTargetColumns, ' is mapped source to target')
+                for check in mappedSourceToTargetColumns.keys():
+                    st.header(check.replace('_',' '))
+                    left,right = st.columns(2)
+                    print(source_connection_details, ' -> source connection details')
+                    print(source_database, ' -> source database details')
+                    print(source_schema, ' -> source schema details')
+                    print(source_table, ' -> source table details')
+                    print(target_connection_details, ' -> target connection details')
+                    print(target_database, ' -> target database details')
+                    print(target_schema, ' -> target schema details')
+                    print(target_table, ' -> target table details')
+                    if len(mappedSourceToTargetColumns[check])>0:
+                        source_result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check,columns=list(mappedSourceToTargetColumns[check].keys()))
+                        target_result_df = validate(connectionDetails=target_connection_details,database=target_database,schema=target_schema,table=target_table,check=check,columns=list(mappedSourceToTargetColumns[check].values()))
+                        left.write(source_result_df)
+                        right.write(target_result_df)
+                    else:
+                        source_result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check)
+                        target_result_df = validate(connectionDetails=target_connection_details,database=target_database,schema=target_schema,table=target_table,check=check)
+                        left.write(source_result_df)
+                        right.write(target_result_df)
+
+
 
     # st.write(listOfChecksColumnsList)
     # st.write(listOfChecks)
 
     st.button("Validate",key=f"{check_type}_validation_button",on_click=execute_queries_for_checks)
- 
-    

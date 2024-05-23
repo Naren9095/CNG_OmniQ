@@ -1,4 +1,5 @@
 import os
+import random
 import re
 import google.generativeai as genai
 import pandas as pd
@@ -91,7 +92,7 @@ def getAzureSqlDescription(connectionDetails,schema,table):
         cursor = azureConnection.cursor()
         cursor.execute(f'''SELECT STRING_AGG(column_info, ',') AS column_data_types FROM (SELECT COLUMN_NAME + ' ' + DATA_TYPE AS column_info FROM INFORMATION_SCHEMA.COLUMNS c INNER JOIN INFORMATION_SCHEMA.TABLES t ON c.TABLE_CATALOG = t.TABLE_CATALOG AND c.TABLE_SCHEMA = t.TABLE_SCHEMA AND c.TABLE_NAME = t.TABLE_NAME WHERE t.TABLE_NAME = '{table}' AND t.TABLE_SCHEMA = '{schema}') AS column_data;''')
         description = cursor.fetchone()
-        query = ''+schema + '.' + table + '(' + description[0] + ')'
+        query =  table + '(' + description[0] + ') and schema is '+schema + ' and table name is ' + table
         azureConnection.close()
         return query
     except Exception as e:
@@ -116,9 +117,10 @@ def getAzureSQLColumns(connectionDetails,schema,table):
     return columnList
  
 def createQueryFromGemini(prompt) -> str:
-    genai.configure(api_key=os.environ.get('GOOGLE_API_KEY'))
+    api_keys = os.environ.get('GOOGLE_API_KEYS').split(',')
+    genai.configure(api_key=api_keys[random.randint(0,len(api_keys)-1)])
     model = genai.GenerativeModel('gemini-1.5-pro-latest')
-    response = model.generate_content(f"{prompt}. Just give me only the query and no other explanation or text.")
+    response = model.generate_content(f"Forget all the previous asked questions and trainings.Generate the query based on the following instructions and return only the query with no additional text, comments, or explanations. {prompt}. Just give me only the query and no other explanation or text.")
     # Use regular expression to extract the SQL statement
     match = re.search(r"`sql\n(.*?)\n`", response.text, re.DOTALL)
     if match:
@@ -136,6 +138,7 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
     elif(os.environ.get(dbProvider) == azure_sql_server):
         description = getAzureSqlDescription(connectionDetails=connectionDetails,schema=schema,table=table)
     if(columns != None):
+        print(check, ' is my check')
         query = f"Give me {os.environ.get(check)} for the following columns {', '.join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
     elif(columns == None):
         query = f"Give me one query for {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
@@ -159,7 +162,6 @@ def executeQuery(dbProvider,connectionDetails,query):
     return resultDf
  
 def validate(connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
-    st.write(f"{check} validate is called")
     print('Received Columns : ',columns)
     prompt = createQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,database=database,schema=schema,table=table,check=check,columns=columns)
     print('prompt is ',prompt)
