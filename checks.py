@@ -4,7 +4,7 @@ import sys
 import os
 import pandas as pd
 sys.path.append('../')
-from dqFunc import getAzureSQLColumns,getSnowflakeColumns,validate
+from dqFunc import getAzureSQLColumns, getSnowflakeColumns, validate
 load_dotenv()
 
 TYPE_SNOWFLAKE = os.getenv("TYPE_SNOWFLAKE")
@@ -169,5 +169,3 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     # st.write(listOfChecks)
 
     st.button("Validate",key=f"{check_type}_validation_button",on_click=execute_queries_for_checks)
- 
-    
