@@ -3,10 +3,13 @@ import sys
 import json
 import os
 from checks import checks_list
-from st_aggrid import AgGrid
+from st_aggrid import AgGrid,GridOptionsBuilder
+
 from dotenv import load_dotenv
 sys.path.append('../')
 from dqFunc import *
+from row_to_row import row_to_row_recon
+
 
 
 # st.session_state['source_validation'] = {}  # Store validation results for source
@@ -18,6 +21,11 @@ CREDENTIALS_FILE_PATH = os.getenv('CREDENTIALS_FILE_PATH')
 TYPE_SNOWFLAKE = os.getenv("TYPE_SNOWFLAKE")
 TYPE_AZURE_SQL_SERVER = os.getenv("TYPE_AZURE_SQL_SERVER")
 USERNAME = os.getenv("USERNAME")
+
+css_content =''
+with open('./ag-grid-theme-builder.css','r+') as f:
+    css_content = f.read()
+
 if os.path.exists(f"{CREDENTIALS_FILE_PATH}"):
     with open(f"{CREDENTIALS_FILE_PATH}",'r') as openfile:
         connection_credentials = json.load(openfile)
@@ -45,7 +53,7 @@ def data_source_form(check_type):
                     preview_data_btn = st.button('Preview Data',key=f'Preview_data_source_{check_type}')
                     if preview_data_btn:
                         st.write('Data Preview')
-                        AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=source_database,schema=source_schema,table=source_table))
+                        AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=source_database,schema=source_schema,table=source_table),height=312,custom_css=css_content)
         # submit_button = st.button("Validate",key='source_validate_button_'+check_type)
         # if submit_button:
         #     st.session_state['source_validation'][check_type] = 'validation_result_1'
@@ -73,7 +81,7 @@ def data_source_form(check_type):
                         preview_source_data_btn = st.button('Preview Data',key=f'Preview_data_source_{check_type}')
                         if preview_source_data_btn:
                             st.write('Data Preview')
-                            AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=source_database,schema=source_schema,table=source_table))
+                            AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][source_connection],database=source_database,schema=source_schema,table=source_table),height=312)
             # source_submit_button = st.button("Validate",key='source_validate_button_'+check_type)
             # if source_submit_button:
             #     st.session_state['source_reconciliation'][check_type] = 'reconciliation_result_1'
@@ -93,7 +101,7 @@ def data_source_form(check_type):
                         preview_target_data_btn = st.button('Preview Data',key=f'Preview_data_target_{check_type}')
                         if preview_target_data_btn:
                             st.write('Data Preview')
-                            AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][target_connection],database=target_database,schema=target_schema,table=target_table))
+                            AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][target_connection],database=target_database,schema=target_schema,table=target_table),height=312)
                     
         #     target_submit_button = st.button("Validate",key='target_validate_button_'+check_type)
             
@@ -107,5 +115,25 @@ def data_source_form(check_type):
         # if 'target_reconciliation' in st.session_state and check_type in st.session_state['target_reconciliation']:
         #     col2.write(f"Target validation result for {check_type}: {st.session_state['target_reconciliation'][check_type]}")
         
+        # if source_connection and source_database and source_schema and source_table and target_connection and target_database and target_schema and target_table:
+            
+        #     checks_list(check_type=check_type,source_connection_details=connection_credentials[USERNAME]['connections'][source_connection],source_database=source_database,source_schema=source_schema,source_table=source_table,target_connection_details=connection_credentials[USERNAME]['connections'][target_connection],target_database=target_database,target_schema=target_schema,target_table=target_table)
+
         if source_connection and source_database and source_schema and source_table and target_connection and target_database and target_schema and target_table:
-            checks_list(check_type=check_type,source_connection_details=connection_credentials[USERNAME]['connections'][source_connection],source_database=source_database,source_schema=source_schema,source_table=source_table,target_connection_details=connection_credentials[USERNAME]['connections'][target_connection],target_database=target_database,target_schema=target_schema,target_table=target_table)
+            agg_row = st.radio('Choose One',['Agg Reconciliation','Row to Row Reconciliation'])
+            if agg_row == 'Agg Reconciliation':
+                checks_list(check_type=check_type,source_connection_details=connection_credentials[USERNAME]['connections'][source_connection],source_database=source_database,source_schema=source_schema,source_table=source_table,target_connection_details=connection_credentials[USERNAME]['connections'][target_connection],target_database=target_database,target_schema=target_schema,target_table=target_table)
+            elif agg_row == 'Row to Row Reconciliation':
+                source_details = {
+                    "database": source_database,
+                    "schema": source_schema,
+                    "table":source_table
+                }
+                target_details = {
+                    "database":target_database,
+                    "schema": target_schema,
+                    "table":target_table
+                }
+                source_connection_obj = connection_credentials[USERNAME]['connections'][source_connection]
+                target_connection_obj = connection_credentials[USERNAME]['connections'][target_connection]
+                row_to_row_recon(source_connection=source_connection_obj,target_connection=target_connection_obj,source_details=source_details,target_details=target_details)

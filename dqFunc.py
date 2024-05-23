@@ -154,6 +154,7 @@ def executeQuery(dbProvider,connectionDetails,query):
     elif(os.environ.get(dbProvider) == azure_sql_server):
         azureConnection = getAzureSQLConnection(server=connectionDetails['server'],database=connectionDetails['database'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
         pd.set_option('display.max_columns',None)
+        print(azureConnection,' azure connection')
         resultDf = pd.read_sql(query,azureConnection)
         azureConnection.close()
     return resultDf
