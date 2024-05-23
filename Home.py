@@ -64,13 +64,13 @@ st.image('logo.png', width=800);
 # st.page_link("pages/Data Validation.py", label="Data Validation", icon="⚾️")
 # st.page_link("pages/Row to Row Reconciliation.py", label="Row to Row Reconciliation", icon="🪀");
 
-col1, col2 = st.columns(2);
+# col1, col2 = st.columns(2);
 
-with col1:
-    col3, col4,col5 = st.columns(3);
-    with col3:
-        st.page_link("Home.py", label="Home", icon="🏠")
-    with col4:
-        st.page_link("pages/Connections.py", label="Connections", icon="🤝")
-    with col5:
-        st.page_link("pages/Data Validation.py", label="Data Validation", icon="⚾️")
+# with col1:
+col3, col4,col5 = st.columns(3);
+with col3:
+    st.page_link("Home.py", label="Home", icon="🏠")
+with col4:
+    st.page_link("pages/Connections.py", label="Connections", icon="🤝")
+with col5:
+    st.page_link("pages/Data Validation.py", label="Data Validation", icon="⚾️")
