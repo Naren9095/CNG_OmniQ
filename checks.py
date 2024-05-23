@@ -155,6 +155,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
 
     resultContainer = st.container()
 
+
     def execute_queries_for_checks():
         if check_type == "Data Validation":
             for check in listOfChecksColumnsList.keys():
