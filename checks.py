@@ -45,6 +45,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     mappedSourceToTargetColumns = {}
     checks_where_columns_not_needed = ("Count check", "Schema check")
     checks_where_columns_mapping_not_needed = ("Aggregation check")
+    # checks_where_multiselect = ("Null Check", "Duplicate Check");
     # data_df = None
     st.header("Select the Checks to perform")
 
@@ -72,28 +73,28 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                 case "Data Reconciliation":
                     if(listOfChecks[check]):
                         if(check not in checks_where_columns_mapping_not_needed):
-                            minColumnListNum = min(len(listOfTableColumns["SourceColumns"]), len(listOfTableColumns["TargetColumns"]))
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.write("Map necessary Source Columns")
-                                for i in range(0, minColumnListNum):
-                                    sourceColumnName = st.selectbox("Choose the Source column name", listOfTableColumns["SourceColumns"],
-                                                                    index=None, key=check+"col1"+"_"+str(i), label_visibility="collapsed", 
-                                                                    placeholder="Choose Source Column")
-                                    mappedSourceColumns.append(sourceColumnName)
+                            # minColumnListNum = min(len(listOfTableColumns["SourceColumns"]), len(listOfTableColumns["TargetColumns"]))
+                            # col1, col2 = st.columns(2)
+                            # with col1:
+                            #     st.write("Map necessary Source Columns")
+                            #     for i in range(0, minColumnListNum):
+                            #         sourceColumnName = st.selectbox("Choose the Source column name", listOfTableColumns["SourceColumns"],
+                            #                                         index=None, key=check+"col1"+"_"+str(i), label_visibility="collapsed", 
+                            #                                         placeholder="Choose Source Column")
+                            #         mappedSourceColumns.append(sourceColumnName)
 
-                            with col2:
-                                st.write("Map necessary Target Columns")
-                                for i in range(0, minColumnListNum):
-                                    targetColumnName = st.selectbox("Choose the Target column name", listOfTableColumns["TargetColumns"],
-                                                                    index=None, key=check+"col2""_"+str(i), label_visibility="collapsed", 
-                                                                    placeholder="Choose Target Column")
-                                    mappedTargetColumns.append(targetColumnName)
+                            # with col2:
+                            #     st.write("Map necessary Target Columns")
+                            #     for i in range(0, minColumnListNum):
+                            #         targetColumnName = st.selectbox("Choose the Target column name", listOfTableColumns["TargetColumns"],
+                            #                                         index=None, key=check+"col2""_"+str(i), label_visibility="collapsed", 
+                            #                                         placeholder="Choose Target Column")
+                            #         mappedTargetColumns.append(targetColumnName)
 
-                            mappedColumns = dict(zip(mappedSourceColumns, mappedTargetColumns))
-                            filteredMappedColumns = {k: v for k, v in mappedColumns.items() if v is not None}
-                            mappedSourceToTargetColumns[upperAndReplace(check)] = filteredMappedColumns
-                        else:
+                            # mappedColumns = dict(zip(mappedSourceColumns, mappedTargetColumns))
+                            # filteredMappedColumns = {k: v for k, v in mappedColumns.items() if v is not None}
+                            # mappedSourceToTargetColumns[upperAndReplace(check)] = filteredMappedColumns
+                        # else:
                             col1, col2 = st.columns(2)
                             with col1:                       
                                 sourceColumns = st.multiselect("Choose necessary Source Columns", listOfTableColumns["SourceColumns"],
@@ -173,17 +174,9 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                 for check in mappedSourceToTargetColumns.keys():
                     st.header(check.replace('_',' '))
                     left,right = st.columns(2)
-                    print(source_connection_details, ' -> source connection details')
-                    print(source_database, ' -> source database details')
-                    print(source_schema, ' -> source schema details')
-                    print(source_table, ' -> source table details')
-                    print(target_connection_details, ' -> target connection details')
-                    print(target_database, ' -> target database details')
-                    print(target_schema, ' -> target schema details')
-                    print(target_table, ' -> target table details')
                     if len(mappedSourceToTargetColumns[check])>0:
-                        source_result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check,columns=list(mappedSourceToTargetColumns[check].keys()))
-                        target_result_df = validate(connectionDetails=target_connection_details,database=target_database,schema=target_schema,table=target_table,check=check,columns=list(mappedSourceToTargetColumns[check].values()))
+                        source_result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check,columns=mappedSourceToTargetColumns[check]['SourceColumns'])
+                        target_result_df = validate(connectionDetails=target_connection_details,database=target_database,schema=target_schema,table=target_table,check=check,columns=mappedSourceToTargetColumns[check]['TargetColumns'])
                         left.write(source_result_df)
                         right.write(target_result_df)
                     else:
@@ -196,5 +189,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
 
     # st.write(listOfChecksColumnsList)
     # st.write(listOfChecks)
+
+    st.write(mappedSourceToTargetColumns);
 
     st.button("Validate",key=f"{check_type}_validation_button",on_click=execute_queries_for_checks)
