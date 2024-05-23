@@ -148,7 +148,9 @@ def executeQuery(dbProvider,connectionDetails,query):
     resultDf = None
     if(os.environ.get(dbProvider) == snowflake):
         snowflakeSession = getSnowflakeConnection(account=connectionDetails['account'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
+        print(snowflakeSession, ' is returned snowflake session')
         if(query == 'show databases;'):
+            print(query,' is query')
             resultDf = pd.DataFrame(snowflakeSession.sql(query).collect())
         else:
             resultObj = snowflakeSession.sql(query)
@@ -162,6 +164,7 @@ def executeQuery(dbProvider,connectionDetails,query):
     return resultDf
  
 def validate(connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
+    st.write(f"{check} validate is called")
     print('Received Columns : ',columns)
     prompt = createQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,database=database,schema=schema,table=table,check=check,columns=columns)
     print('prompt is ',prompt)
