@@ -61,6 +61,7 @@ else:
 
 def data_source_form(check_type):
     source_connection=source_database=source_schema=source_table=None
+    st.divider()
     st.header(check_type)
     if check_type == "Data Validation":
         st.header("Select Source")
@@ -75,14 +76,18 @@ def data_source_form(check_type):
                 source_schema = st.selectbox('Select Schema',source_schema_options,key='source_schema_button_'+check_type)
                 st.session_state[st_source_schema] = source_schema
                 if st.session_state[st_source_schema]:
-                    source_table_options = ([''] + getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema])) if st.session_state[st_source_connection]!='' and st.session_state[st_source_database]!='' and st.session_state[st_source_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['database'],schema=st.session_state[st_source_schema]))
-                    source_table = st.selectbox('Select Table',source_table_options,key='source_table_button_'+check_type)
-                    st.session_state[st_source_table] = source_table
-                    if st.session_state[st_source_table]:
-                        preview_data_btn = st.button('Preview Data',key=f'Preview_data_source_{check_type}')
-                        if preview_data_btn:
-                            st.write('Data Preview')
-                            AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema],table=st.session_state[st_source_table]))
+                    source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True)
+                    if source_table_or_custom_query == 'Table':
+                        source_table_options = ([''] + getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema])) if st.session_state[st_source_connection]!='' and st.session_state[st_source_database]!='' and st.session_state[st_source_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['database'],schema=st.session_state[st_source_schema]))
+                        source_table = st.selectbox('Select Table',source_table_options,key='source_table_button_'+check_type)
+                        st.session_state[st_source_table] = source_table
+                        if st.session_state[st_source_table]:
+                            preview_data_btn = st.button('Preview Data',key=f'Preview_data_source_{check_type}')
+                            if preview_data_btn:
+                                st.write('Data Preview')
+                                AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema],table=st.session_state[st_source_table]))
+                    else:
+                        st.text_area('Enter Custom Query',key=f'source_data_custom_query_{check_type}')
         # submit_button = st.button("Validate",key='source_validate_button_'+check_type)
         # if submit_button:
         #     st.session_state['source_validation'][check_type] = 'validation_result_1'
@@ -108,14 +113,18 @@ def data_source_form(check_type):
                     source_schema = st.selectbox('Select Schema',source_schema_options,key='source_schema_button_'+check_type)
                     st.session_state[st_source_schema] = source_schema
                     if st.session_state[st_source_schema]:
-                        source_table_options = (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema])) if st.session_state[st_source_connection]!='' and st.session_state[st_source_database]!='' and st.session_state[st_source_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['database'],schema=st.session_state[st_source_schema]))
-                        source_table = st.selectbox('Select Table',source_table_options,key='source_table_button_'+check_type)
-                        st.session_state[st_source_table] = source_table
-                        if st.session_state[st_source_table]:
-                            preview_source_data_btn = st.button('Preview Data',key=f'Preview_data_source_{check_type}')
-                            if preview_source_data_btn:
-                                st.write('Data Preview')
-                                AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema],table=st.session_state[st_source_table]))
+                        source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True)
+                        if source_table_or_custom_query == 'Table':
+                            source_table_options = (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema])) if st.session_state[st_source_connection]!='' and st.session_state[st_source_database]!='' and st.session_state[st_source_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['database'],schema=st.session_state[st_source_schema]))
+                            source_table = st.selectbox('Select Table',source_table_options,key='source_table_button_'+check_type)
+                            st.session_state[st_source_table] = source_table
+                            if st.session_state[st_source_table]:
+                                preview_source_data_btn = st.button('Preview Data',key=f'Preview_data_source_{check_type}')
+                                if preview_source_data_btn:
+                                    st.write('Data Preview')
+                                    AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema],table=st.session_state[st_source_table]))
+                        else:
+                            st.text_area('Enter Custom Query',key=f'source_data_custom_query_{check_type}')
             # source_submit_button = st.button("Validate",key='source_validate_button_'+check_type)
             # if source_submit_button:
             #     st.session_state['source_reconciliation'][check_type] = 'reconciliation_result_1'
@@ -133,14 +142,18 @@ def data_source_form(check_type):
                     target_schema = st.selectbox('Select Schema',target_schema_options,key='target_schema_button_'+check_type)
                     st.session_state[st_target_schema] = target_schema
                     if st.session_state[st_target_schema]:
-                        target_table_options = ([''] + getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]],database=st.session_state[st_target_database],schema=st.session_state[st_target_schema])) if st.session_state[st_target_connection]!='' and st.session_state[st_target_database]!='' and st.session_state[st_target_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]]['database'],schema=st.session_state[st_target_schema]))
-                        target_table = st.selectbox('Select Table',target_table_options,key='target_table_button_'+check_type)
-                        st.session_state[st_target_table] = target_table
-                        if st.session_state[st_target_table]:
-                            preview_target_data_btn = st.button('Preview Data',key=f'Preview_data_target_{check_type}')
-                            if preview_target_data_btn:
-                                st.write('Data Preview')
-                                AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]],database=st.session_state[st_target_database],schema=st.session_state[st_target_schema],table=st.session_state[st_target_table]))
+                        source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True)
+                        if source_table_or_custom_query == 'Table':
+                            target_table_options = ([''] + getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]],database=st.session_state[st_target_database],schema=st.session_state[st_target_schema])) if st.session_state[st_target_connection]!='' and st.session_state[st_target_database]!='' and st.session_state[st_target_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]]['database'],schema=st.session_state[st_target_schema]))
+                            target_table = st.selectbox('Select Table',target_table_options,key='target_table_button_'+check_type)
+                            st.session_state[st_target_table] = target_table
+                            if st.session_state[st_target_table]:
+                                preview_target_data_btn = st.button('Preview Data',key=f'Preview_data_target_{check_type}')
+                                if preview_target_data_btn:
+                                    st.write('Data Preview')
+                                    AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]],database=st.session_state[st_target_database],schema=st.session_state[st_target_schema],table=st.session_state[st_target_table]))
+                        else:
+                            st.text_area('Enter Custom Query',key=f'target_data_custom_query_{check_type}')
                     
         #     target_submit_button = st.button("Validate",key='target_validate_button_'+check_type)
             

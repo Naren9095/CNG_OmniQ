@@ -40,6 +40,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     mappedColumns = {}
 
     st.markdown(styles, unsafe_allow_html=True)
+    st.divider()
     st.header("Perform Checks")
     qualityCheckType = check_type
     mappedSourceToTargetColumns = {}
@@ -190,6 +191,6 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     # st.write(listOfChecksColumnsList)
     # st.write(listOfChecks)
 
-    st.write(mappedSourceToTargetColumns);
+    # st.write(mappedSourceToTargetColumns);
 
     st.button("Validate",key=f"{check_type}_validation_button",on_click=execute_queries_for_checks)
