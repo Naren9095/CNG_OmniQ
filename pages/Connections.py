@@ -62,3 +62,19 @@ with top_container:
                     snow_Cred(account=connection_name['account'],user_name=connection_name['username'],password=connection_name['password'],connection_name=conn,connection_from='existing_connection')
         else:
             st.error('No Existing Connections. Create a Connection first')
+
+page_bg = """
+    <style>
+         [data-testid="stSidebarContent"] {
+           background: rgb(238,174,202);
+           background: linear-gradient(164deg, rgba(238,174,202,0.22875087535014005) 29%, rgba(148,187,233,0.7077424719887955) 100%);
+        }
+
+       /* [data-testid="stAppViewBlockContainer"] {
+            display: flex;
+            justify-content: center;
+        } */
+    </style>
+"""
+
+st.markdown(page_bg, unsafe_allow_html=True)

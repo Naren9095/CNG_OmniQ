@@ -144,10 +144,12 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
         query = f"Give me one query for {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
     return query
  
-def executeQuery(dbProvider,connectionDetails,query):
+def executeQuery(dbProvider,connectionDetails,query,database=None):
     resultDf = None
     if(os.environ.get(dbProvider) == snowflake):
         snowflakeSession = getSnowflakeConnection(account=connectionDetails['account'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
+        if database:
+            snowflakeSession.sql(f'USE DATABASE {database};').collect()
         if(query == 'show databases;'):
             resultDf = pd.DataFrame(snowflakeSession.sql(query).collect())
         else:
@@ -168,7 +170,7 @@ def validate(connectionDetails,database:str,schema:str,table:str,check:str,colum
     print('prompt is ',prompt)
     query = createQueryFromGemini(prompt=prompt)
     print('query from gemini is ',query)
-    resultDataframe = executeQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,query=query)
+    resultDataframe = executeQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,query=query,database=database)
     print(resultDataframe,' inside Validate')
     return resultDataframe
  
