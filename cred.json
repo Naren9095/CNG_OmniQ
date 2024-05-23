@@ -1,21 +1,37 @@
 {
-  "username1": {
-    "connections": {
-      "sql_Server_conn_new": {
-        "username": "OmniQSuite",
-        "password": "DataQuality@#123",
-        "server": "omniqsuiteserver.database.windows.net",
-        "database": "testOmniQSuite",
-        "type": "AZURE_SQL_SERVER",
-        "connection_name": "sql_Server_conn_new"
-      },
-      "snow_new_new_12345": {
-        "account": "fvrfaye-rl30738",
-        "username": "cngdata",
-        "password": "Cngdata@#123",
-        "connection_name": "snow_new_new_12345",
-        "type": "SNOWFLAKE"
+   "username1": {
+      "connections": {
+         "sql_Server_conn_new": {
+            "username": "OmniQSuite",
+            "password": "DataQuality@#123",
+            "server": "omniqsuiteserver.database.windows.net",
+            "database": "testOmniQSuite",
+            "type": "AZURE_SQL_SERVER",
+            "connection_name": "sql_Server_conn_new"
+         },
+         "snow_new_new_12345": {
+            "account": "fvrfaye-rl30738",
+            "username": "cngdata",
+            "password": "Cngdata@#123",
+            "connection_name": "snow_new_new_12345",
+            "type": "SNOWFLAKE"
+         },
+         "sql_Server_conn_net": {
+            "username": "OmniQSuite",
+            "password": "DataQuality@#123",
+            "server": "omniqsuiteserver.database.windows.net",
+            "database": "testOmniQSuite",
+            "type": "AZURE_SQL_SERVER",
+            "connection_name": "sql_Server_conn_net"
+         },
+         "sql_Server_conn_ne": {
+            "username": "OmniQSuite",
+            "password": "DataQuality@#123",
+            "server": "omniqsuiteserver.database.windows.net",
+            "database": "testOmniQSuite",
+            "type": "AZURE_SQL_SERVER",
+            "connection_name": "sql_Server_conn_ne"
+         }
       }
-    }
-  }
+   }
 }

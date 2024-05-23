@@ -76,7 +76,7 @@ def data_source_form(check_type):
                 source_schema = st.selectbox('Select Schema',source_schema_options,key='source_schema_button_'+check_type)
                 st.session_state[st_source_schema] = source_schema
                 if st.session_state[st_source_schema]:
-                    source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True)
+                    source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True,key=f'radio_data_source_{check_type}')
                     if source_table_or_custom_query == 'Table':
                         source_table_options = ([''] + getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema])) if st.session_state[st_source_connection]!='' and st.session_state[st_source_database]!='' and st.session_state[st_source_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['database'],schema=st.session_state[st_source_schema]))
                         source_table = st.selectbox('Select Table',source_table_options,key='source_table_button_'+check_type)
@@ -113,7 +113,7 @@ def data_source_form(check_type):
                     source_schema = st.selectbox('Select Schema',source_schema_options,key='source_schema_button_'+check_type)
                     st.session_state[st_source_schema] = source_schema
                     if st.session_state[st_source_schema]:
-                        source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True)
+                        source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True,key=f'radio_data_source_{check_type}')
                         if source_table_or_custom_query == 'Table':
                             source_table_options = (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema])) if st.session_state[st_source_connection]!='' and st.session_state[st_source_database]!='' and st.session_state[st_source_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]['database'],schema=st.session_state[st_source_schema]))
                             source_table = st.selectbox('Select Table',source_table_options,key='source_table_button_'+check_type)
@@ -142,7 +142,7 @@ def data_source_form(check_type):
                     target_schema = st.selectbox('Select Schema',target_schema_options,key='target_schema_button_'+check_type)
                     st.session_state[st_target_schema] = target_schema
                     if st.session_state[st_target_schema]:
-                        source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True)
+                        source_table_or_custom_query=st.radio('',['Table','Custom Query'],horizontal=True,key=f'radio_data_target_{check_type}')
                         if source_table_or_custom_query == 'Table':
                             target_table_options = ([''] + getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]],database=st.session_state[st_target_database],schema=st.session_state[st_target_schema])) if st.session_state[st_target_connection]!='' and st.session_state[st_target_database]!='' and st.session_state[st_target_schema]!='' and connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]]['type']!=TYPE_AZURE_SQL_SERVER else (getTableList(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]],database=connection_credentials[USERNAME]['connections'][st.session_state[st_target_connection]]['database'],schema=st.session_state[st_target_schema]))
                             target_table = st.selectbox('Select Table',target_table_options,key='target_table_button_'+check_type)
