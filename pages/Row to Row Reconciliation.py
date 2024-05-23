@@ -153,7 +153,18 @@ if ls_prmkey_src and ls_prmkey_trg:
   st.write()
   AgGrid(final_df)
 
+page_bg = """
+    <style>
+         [data-testid="stSidebarContent"] {
+           background: rgb(238,174,202);
+           background: linear-gradient(164deg, rgba(238,174,202,0.22875087535014005) 29%, rgba(148,187,233,0.7077424719887955) 100%);
+        }
 
+       /* [data-testid="stAppViewBlockContainer"] {
+            display: flex;
+            justify-content: center;
+        } */
+    </style>
+"""
 
-
-
+st.markdown(page_bg, unsafe_allow_html=True)
