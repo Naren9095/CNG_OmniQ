@@ -6,3 +6,5 @@ snowflake-connector-python
 streamlit-aggrid
 SQLAlchemy
 streamlit-lottie
+pyodbc
+snowflake-snowpark-python
