@@ -57,9 +57,9 @@ def deleting_Cred(connection_name):
 def sql_Server_Conn(user_name,password,server_name,database_name,connection_name):
     driver_name = "{ODBC Driver 18 for SQL Server}"
     try:
-        connection_string = f"DRIVER={driver_name};SERVER={server_name};DATABASE={database_name};UID={user_name};PWD={password}"
+        connection_string = f"DRIVER={driver_name};SERVER={server_name};DATABASE={database_name};UID={user_name};PWD={password};Connect Timeout=60"
         connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
-        engine = create_engine(connection_url)
+        engine = create_engine(connection_url,pool_pre_ping=True)
         # return st.success('Connection is successful')
         with engine.begin() as conn:
             df = pd.read_sql_query('select 1', conn)
@@ -73,7 +73,7 @@ def sql_Server_Conn(user_name,password,server_name,database_name,connection_name
         
     except Exception as e:
         return st.error('Error ',icon='⭕'),st.error(e)
-    
+
 def snow_Conn(account,user_name,password,connection_name):
     snowflake_conn_prop = {
         "account":account,
@@ -91,3 +91,6 @@ def snow_Conn(account,user_name,password,connection_name):
 
     except Exception as e:
         return st.error('Error ',icon='⭕'),st.error(e)
+# Driver={ODBC Driver 18 for SQL Server};Server=tcp:sqlserver9094.database.windows.net,1433;Database=bronze;Uid=sqlserver9094;Pwd=Naren9094@;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;
+# mssql+pyodbc://?odbc_connect=DRIVER%3D%7BODBC+Driver+18+for+SQL+Server%7D%3BSERVER%3Dtcp%3Asqlserver9094.database.windows.net%2C1433%3BDATABASE%3Dbronze%3BUID%3Dsqlserver9094%3BPWD%3DNaren9094%40%3BConnect+Timeout%3D60
+# jdbc:sqlserver://sqlserver9094.database.windows.net:1433;database=bronze;user=sqlserver9094@sqlserver9094;password=Naren9094@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;

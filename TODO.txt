@@ -1,0 +1,14 @@
+Add multiple new type of connections
+Make the getDescription, getSchema, getTables, getColumns functions to be generic
+Instead of separate getConnections fn(s) create a generic getConnection function
+getDataPreview must support any type of DB connection. 
+Implement the logic for the existing checks (test it) and if possible add any new checks.
+PoC for integration of spark - (for computing).
+Test row-to-row reconiliation for different sources.
+
+
+Quality: 
+Remove commented codes
+Implement Resuable Components
+Implement LocalStorage for connection pooling.
+Remove unwanted files

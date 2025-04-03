@@ -8,6 +8,7 @@ import re
 load_dotenv()
 
 # GOOGLE_API_KEY=os.environ.get('GOOGLE_API_KEY')
+# "AIzaSyD0qnU1FuorrzB5EbTGXDV3xoTsGnrg87o,AIzaSyDZF3UGdSYCoAJSeveC1ks-cE7le_ZBYhc,AIzaSyA1qnV4xPBsm9fJo-wXCYhxU205KoI7DuI,AIzaSyA5Um1rv76I6ixa0QqqpA8UJ49os6FHdzQ,AIzaSyBlp8Hb1iwDE6RLW4HEyvB_i_4eTi36xxQ"
 GOOGLE_API_KEY = 'AIzaSyAFk5aDF2uOYkwyC8NDdSYOzusT2UEhCBY'
 genai.configure(api_key=GOOGLE_API_KEY)
 

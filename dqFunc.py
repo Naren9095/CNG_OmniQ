@@ -7,6 +7,7 @@ from pandas import DataFrame
 import pyodbc as pyodbc
 from pyodbc import Connection
 from snowflake.snowpark.session import Session
+from sqlalchemy import URL, create_engine
 import streamlit as st
 from dotenv import load_dotenv
 load_dotenv()
@@ -73,18 +74,34 @@ def getSnowflakeColumns(connectionDetails,database,schema,table):
     columnList = df['COLUMNS'].values.tolist()
     return columnList
  
-def getAzureSQLConnection(server,database,username,password,needConnection:bool = False) -> Connection | str:
-    driver = os.environ.get('SQL_DRIVER')
-    connection = None
+def getAzureSQLConnection(
+    server: str,
+    database: str,
+    username: str,
+    password: str,
+    use_sqlalchemy: bool=False,
+    needConnection: bool = False
+):
+    driver = os.environ.get('SQL_DRIVER', '{ODBC Driver 18 for SQL Server}')  # Default to Driver 18
+    connection_string = f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Connect Timeout=60"
+    
     try:
-        connection = pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password)
+        if use_sqlalchemy:
+            connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
+            engine = create_engine(connection_url, pool_pre_ping=True)
+
+            return engine  # Return SQLAlchemy engine for further queries
+        
+        else:
+            connection = pyodbc.connect(connection_string)
+            if not needConnection:
+                connection.close()
+            return connection  # Return pyodbc connection object
+
     except Exception as e:
-        return f"{os.environ.get('CONNECTION_ERROR')}. Error: {repr(e)}"
-    if(needConnection == False):
-        connection.close()
-        return "Connection successfull"
-    else:
-        return connection
+        error_message = os.environ.get('CONNECTION_ERROR', 'Connection failed')
+        st.error(f"{error_message}. Error: {repr(e)}")
+        return None
     
 def getAzureSqlDescription(connectionDetails,schema,table):
     try:   
@@ -157,9 +174,10 @@ def executeQuery(dbProvider,connectionDetails,query,database=None):
             resultDf = resultObj.toPandas()
         snowflakeSession.close()
     elif(os.environ.get(dbProvider) == azure_sql_server):
+        print("WITHIN BEFORE GETTING AZURE SQL CONNECTION")
         azureConnection = getAzureSQLConnection(server=connectionDetails['server'],database=connectionDetails['database'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
         pd.set_option('display.max_columns',None)
-        print(azureConnection,' azure connection')
+        print('AFTER getting azure connection')
         resultDf = pd.read_sql(query,azureConnection)
         azureConnection.close()
     return resultDf
