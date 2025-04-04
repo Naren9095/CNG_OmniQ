@@ -112,8 +112,6 @@ def row_to_row_recon(source_connection,target_connection,source_details,target_d
 
       no_of_Columns = len(ls_src)
 
-      # print(merged_df.iloc[:, :no_of_Columns])
-      # print(merged_df.iloc[:, no_of_Columns:])
 
       #-------------------------------------------------------------- dividing the data frame into two dataframes for usage in the COMPARE function.
       left_table = merged_df.iloc[:, :no_of_Columns]
@@ -131,9 +129,6 @@ def row_to_row_recon(source_connection,target_connection,source_details,target_d
 
 
       c_df = left_table.compare(right_table)
-      # print(type(c_df))
-      # print('list of indexes \n',list(c_df.index))
-      # print('Columns \n',c_df.columns)
       # st.write(c_df)
       # c_df_pd = pd.DataFrame(list(c_df.index),columns=list(c_df.index))
       final_df = pd.DataFrame(list(c_df.index),columns=ls_prmkey_src)

@@ -3,7 +3,7 @@ import sys
 import json
 import os
 from checks import checks_list
-from st_aggrid import AgGrid,GridOptionsBuilder
+from st_aggrid import AgGrid,GridOptionsBuilder, GridUpdateMode
 
 from dotenv import load_dotenv
 sys.path.append('../')
@@ -83,9 +83,29 @@ def data_source_form(check_type):
                         st.session_state[st_source_table] = source_table
                         if st.session_state[st_source_table]:
                             preview_data_btn = st.button('Preview Data',key=f'Preview_data_source_{check_type}')
-                            if preview_data_btn:
-                                st.write('Data Preview')
-                                AgGrid(getDataPreview(connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],database=st.session_state[st_source_database],schema=st.session_state[st_source_schema],table=st.session_state[st_source_table]))
+                            if preview_data_btn or 'preview_data' in st.session_state:
+                                if preview_data_btn:
+                                    st.session_state['preview_data'] = getDataPreview(
+                                        connectionDetails=connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]],
+                                        database=st.session_state[st_source_database],
+                                        schema=st.session_state[st_source_schema],
+                                        table=st.session_state[st_source_table]
+                                    )
+
+                                if 'preview_data' in st.session_state:
+                                    st.write('Data Preview')
+                                    gb = GridOptionsBuilder.from_dataframe(st.session_state['preview_data'])
+                                    gb.configure_pagination()
+                                    gb.configure_default_column(editable=True, groupable=True)
+                                    grid_options = gb.build()
+
+                                    AgGrid(
+                                        st.session_state['preview_data'],
+                                        gridOptions=grid_options,
+                                        update_mode=GridUpdateMode.VALUE_CHANGED,
+                                        allow_unsafe_jscode=True,
+                                        theme='streamlit'
+                                    )
                     else:
                         st.text_area('Enter Custom Query',key=f'source_data_custom_query_{check_type}')
         # submit_button = st.button("Validate",key='source_validate_button_'+check_type)

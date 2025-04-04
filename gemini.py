@@ -56,4 +56,4 @@ my_schema = ''' YOUTUBE (
 	VIDEOS_PER_WEEK NUMBER(4,2)
 );'''
 
-print(get_query(f"Give me {os.environ.get('COUNT_CHECK')} for the following {os.environ.get('SNOWFLAKE')} table.{my_schema}"))
+# print(get_query(f"Give me {os.environ.get('COUNT_CHECK')} for the following {os.environ.get('SNOWFLAKE')} table.{my_schema}"))

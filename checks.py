@@ -55,8 +55,6 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     #     targetColumns = data_df["Map Target Columns"].tolist()
 
     #     # mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
-    #     print("sourceColumns: ", sourceColumns)
-    #     print("targetColumns: ", targetColumns)
     
     def upperAndReplace(checkStr):
         return checkStr.upper().replace(' ', '_')
@@ -161,7 +159,6 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     def execute_queries_for_checks():
         if check_type == "Data Validation":
             for check in listOfChecksColumnsList.keys():
-                print(listOfChecksColumnsList[check],' is th crnt chk')
                 if listOfChecksColumnsList[check] != []:
                     result_df = validate(connectionDetails=source_connection_details,database=source_database,schema=source_schema,table=source_table,check=check,columns=listOfChecksColumnsList[check])
                 else:
@@ -171,7 +168,6 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                     st.write(result_df)
         else:
             with resultContainer:
-                print(mappedSourceToTargetColumns, ' is mapped source to target')
                 for check in mappedSourceToTargetColumns.keys():
                     st.header(check.replace('_',' '))
                     left,right = st.columns(2)

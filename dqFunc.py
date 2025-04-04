@@ -155,7 +155,6 @@ def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:s
     elif(os.environ.get(dbProvider) == azure_sql_server):
         description = getAzureSqlDescription(connectionDetails=connectionDetails,schema=schema,table=table)
     if(columns != None):
-        print(check, ' is my check')
         query = f"Give me {os.environ.get(check)} for the following columns {', '.join([column for column in columns])} in {os.environ.get(dbProvider)} table. Table description is {description}"
     elif(columns == None):
         query = f"Give me one query for {os.environ.get(check)} for the following {os.environ.get(dbProvider)} table. Table description is {description}"
@@ -174,22 +173,16 @@ def executeQuery(dbProvider,connectionDetails,query,database=None):
             resultDf = resultObj.toPandas()
         snowflakeSession.close()
     elif(os.environ.get(dbProvider) == azure_sql_server):
-        print("WITHIN BEFORE GETTING AZURE SQL CONNECTION")
         azureConnection = getAzureSQLConnection(server=connectionDetails['server'],database=connectionDetails['database'],username=connectionDetails['username'],password=connectionDetails['password'],needConnection=True)
         pd.set_option('display.max_columns',None)
-        print('AFTER getting azure connection')
         resultDf = pd.read_sql(query,azureConnection)
         azureConnection.close()
     return resultDf
  
 def validate(connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
-    print('Received Columns : ',columns)
     prompt = createQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,database=database,schema=schema,table=table,check=check,columns=columns)
-    print('prompt is ',prompt)
     query = createQueryFromGemini(prompt=prompt)
-    print('query from gemini is ',query)
     resultDataframe = executeQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,query=query,database=database)
-    print(resultDataframe,' inside Validate')
     return resultDataframe
  
 def getDatabaseList(connectionDetails):
