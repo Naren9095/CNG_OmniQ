@@ -34,7 +34,7 @@ with top_container:
 
 
     col1,col2 = st.columns(2,gap='small')
-    newconnbutton = col1.radio('',['New Connection','Existing Connections'],horizontal=True)
+    newconnbutton = col1.radio('  ',['New Connection','Existing Connections'],horizontal=True,label_visibility='collapsed')
     # st.write(newconnbutton)
     
 
