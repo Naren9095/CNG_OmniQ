@@ -174,7 +174,7 @@ def createQueryFromGemini(prompt) -> str:
             else:
                 return query
     except Exception as e:
-        raise RuntimeError(f"Error interacting with Gemini API: {e}")
+        raise Exception(f"Error interacting with Gemini API: {e}")
  
 def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
     description = None
