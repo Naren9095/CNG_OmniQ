@@ -153,18 +153,28 @@ def getAzureSQLColumns(connectionDetails,schema,table):
  
 def createQueryFromGemini(prompt) -> str:
     
-    api_keys = os.environ.get('GOOGLE_API_KEYS').split(',')
-    genai.configure(api_key=api_keys[random.randint(0,len(api_keys)-1)])
-    model = genai.GenerativeModel('gemini-1.5-pro-latest')
-    response = model.generate_content(f"Forget all the previous asked questions and trainings.Generate the query based on the following instructions and return only the query with no additional text, comments, or explanations. {prompt}. Just give me only the query and no other explanation or text.")
-    # Use regular expression to extract the SQL statement
-    print("RESPONSE QUERY FROM GEMINI IS, ", response.text)
-    match = re.search(r"`sql\n(.*?)\n`", response.text, re.DOTALL)
-    if match:
-        query = match.group(1).strip()
-        return query  # Extract group 1 (the SQL statement) and remove leading/trailing whitespace
-    else:
-        return "Unable to extract query from response."
+    api_keys_list = os.environ.get('GOOGLE_API_KEYS').split(',')
+    if not api_keys_list:
+        raise ValueError("GOOGLE_API_KEYS environment variable not set.")
+    try:
+        genai.configure(api_key=random.choice(api_keys_list))
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
+        response = model.generate_content(f"Forget all the previous asked questions and trainings.Generate the query based on the following instructions and return only the query with no additional text, comments, or explanations. {prompt}. Just give me only the query and no other explanation or text.")
+
+        print("RESPONSE QUERY FROM GEMINI IS, ", response.text)
+        query = response.text.strip()
+
+        match = re.search(r"```sql\n(.*?)\n```", query, re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        else:
+            match = re.search(r"`(.*?)`", query, re.DOTALL)
+            if match:
+                return match.group(1).strip()
+            else:
+                return query
+    except Exception as e:
+        raise RuntimeError(f"Error interacting with Gemini API: {e}")
  
 def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
     description = None
