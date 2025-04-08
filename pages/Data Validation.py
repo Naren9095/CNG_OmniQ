@@ -1,7 +1,6 @@
 import streamlit as st
 from forms.data_source_form import data_source_form
 
-# Navigation within main content
 st.title("Data Quality")
 page_names = ["Data Validation", "Data Reconciliation"]
 page = st.selectbox("Select ", page_names)

@@ -10,13 +10,6 @@ sys.path.append('../')
 from dqFunc import *
 from row_to_row import row_to_row_recon
 
-
-# State Handling
-# st.session_state['source_validation'] = {}  # Store validation results for source
-# st.session_state['source_reconciliation'] = {}  # Store validation results for source
-# st.session_state['target_reconciliation'] = {}  # Store validation results for target
-
-
 data_connections = []
 load_dotenv()
 CREDENTIALS_FILE_PATH = os.getenv('CREDENTIALS_FILE_PATH')
@@ -40,7 +33,6 @@ def data_source_form(check_type):
     st.divider()
     st.header(check_type)
     if check_type == "Data Validation":
-        # 🔑 Define session state keys
         st_source_connection = f"{check_type}_source_connection"
         st_source_database = f"{check_type}_source_database"
         st_source_schema = f"{check_type}_source_schema"
@@ -59,7 +51,6 @@ def data_source_form(check_type):
             conn_details = connection_credentials[USERNAME]['connections'][st.session_state[st_source_connection]]
             is_azure = conn_details['type'] == TYPE_AZURE_SQL_SERVER
 
-            # 🟦 Select Database
             if not is_azure:
                 try:
                     source_database_options = [''] + getDatabaseList(connectionDetails=conn_details)
@@ -76,7 +67,6 @@ def data_source_form(check_type):
             st.session_state[st_source_database] = source_database
 
             if st.session_state[st_source_database]:
-                # 🟨 Select Schema
                 if not is_azure:
                     source_schema_options = getSchemaList(
                         connectionDetails=conn_details,
@@ -96,7 +86,6 @@ def data_source_form(check_type):
                 st.session_state[st_source_schema] = source_schema
 
                 if st.session_state[st_source_schema]:
-                    # 🟥 Table vs Custom Query
                     source_table_or_custom_query = st.radio(
                         '   ',
                         ['Table', 'Custom Query'],
@@ -105,7 +94,6 @@ def data_source_form(check_type):
                     )
 
                     if source_table_or_custom_query == 'Table':
-                        # 🟧 Select Table
                         if not is_azure:
                             source_table_options = [''] + getTableList(
                                 connectionDetails=conn_details,
@@ -156,10 +144,8 @@ def data_source_form(check_type):
                                     theme='streamlit'
                                 )
                     else:
-                        # 📝 Custom Query Input
                         st.text_area('Enter Custom Query', key=f'source_data_custom_query_{check_type}')
 
-        # ✅ Optional follow-up logic
         if (
             st.session_state.get(st_source_connection)
             and st.session_state.get(st_source_database)
@@ -185,13 +171,11 @@ def data_source_form(check_type):
         st_preview_source_data = f'preview_source_data_{check_type}'
         st_preview_target_data = f'preview_target_data_{check_type}'
 
-        # Initialize session state for dropdowns if not present
         for key in [st_source_connection, st_source_database, st_source_schema, st_source_table,
                     st_target_connection, st_target_database, st_target_schema, st_target_table]:
             if key not in st.session_state:
                 st.session_state[key] = None
 
-        # Initialize session state for preview data
         if st_preview_source_data not in st.session_state:
             st.session_state[st_preview_source_data] = None
         if st_preview_target_data not in st.session_state:

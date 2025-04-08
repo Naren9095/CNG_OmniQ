@@ -20,19 +20,16 @@ def get_query(query):
     response = model.generate_content(f"{query}. Just give me ONLY the SQL query, with no other explanation or text. If you must use a code block, use ```sql ... ```")
     print("RESPONSE IS \n", response.text)
 
-    # Attempt to extract from code block first.
     match = re.search(r"```sql\s*(.*?)\s*```", response.text, re.DOTALL)
     if match:
         return match.group(1).strip()
 
-    # If no code block, try to get the first sentence that looks like a query.
     lines = response.text.split('\n')
     for line in lines:
         line = line.strip()
         if line.lower().startswith(('select', 'insert', 'update', 'delete', 'create', 'drop', 'alter')):
             return line
 
-    # If all else fails, return an error message.
     raise Exception(f"Error: Could not extract SQL query from response: {response.text}")
 
     
@@ -56,4 +53,3 @@ my_schema = ''' YOUTUBE (
 	VIDEOS_PER_WEEK NUMBER(4,2)
 );'''
 
-# print(get_query(f"Give me {os.environ.get('COUNT_CHECK')} for the following {os.environ.get('SNOWFLAKE')} table.{my_schema}"))

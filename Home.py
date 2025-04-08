@@ -28,46 +28,9 @@ page_bg = """
 
 st.markdown(page_bg, unsafe_allow_html=True)
 
-st.image('logo.png', width=800);
+st.image('logo.png', width=800)
 
-# url = requests.get( 
-#     "https://lottie.host/873217e0-3225-4fdc-b05c-2c59df812741/FsQyPza8B5.lottie") 
-# Creating a blank dictionary to store JSON file, 
-# as their structure is similar to Python Dictionary 
-# url_json = dict() 
-
-# if url.status_code == 200: 
-#     url_json = url.json() 
-# else: 
-#     print("Error in the URL") 
-
-# def load_lottiefile(filepath: str):
-#      with(filepath, "r") as f:
-#           return json.load(f);
-
-# lottieCoding = load_lottiefile("lottieFiles/anim.json");
-
-# st.lottie(lottieCoding);
-
-# col1, col2 = st.columns(2);
-
-# with col1:
-#     st.page_link("Home.py", label="Home", icon="🏠")
-#     st.page_link("pages/Connections.py", label="Connections", icon="🤝")
-
-# with col2:
-#     st.page_link("pages/Data Validation.py", label="Data Validation", icon="⚾️")
-#     st.page_link("pages/Row to Row Reconciliation.py", label="Row to Row Reconciliation", icon="🪀");
-
-# st.page_link("Home.py", label="Home", icon="🏠")
-# st.page_link("pages/Connections.py", label="Connections", icon="🤝")
-# st.page_link("pages/Data Validation.py", label="Data Validation", icon="⚾️")
-# st.page_link("pages/Row to Row Reconciliation.py", label="Row to Row Reconciliation", icon="🪀");
-
-# col1, col2 = st.columns(2);
-
-# with col1:
-col3, col4,col5 = st.columns(3);
+col3, col4,col5 = st.columns(3)
 with col3:
     st.page_link("Home.py", label="Home", icon="🏠")
 with col4:

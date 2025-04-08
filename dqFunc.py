@@ -164,7 +164,6 @@ def createQueryFromGemini(prompt) -> str:
         query = match.group(1).strip()
         return query  # Extract group 1 (the SQL statement) and remove leading/trailing whitespace
     else:
-        # Handle cases where the response doesn't contain the expected format
         return "Unable to extract query from response."
  
 def createQuery(dbProvider:str,connectionDetails,database:str,schema:str,table:str,check:str,columns:list = None):
@@ -207,7 +206,6 @@ def executeQuery(dbProvider, connectionDetails, query, database=None):
         snowflakeSession.close()
 
     elif os.environ.get(dbProvider) == azure_sql_server:
-        # ✅ Always use SQLAlchemy
         azure_engine = getAzureSQLConnection(
             server=connectionDetails['server'],
             database=connectionDetails['database'],

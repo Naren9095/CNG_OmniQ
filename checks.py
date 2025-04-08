@@ -46,16 +46,8 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
     mappedSourceToTargetColumns = {}
     checks_where_columns_not_needed = ("Count check", "Schema check")
     checks_where_columns_mapping_not_needed = ("Aggregation check")
-    # checks_where_multiselect = ("Null Check", "Duplicate Check");
-    # data_df = None
     st.header("Select the Checks to perform")
 
-    # def storeMappedValues(data_df, mappedSourceToTargetColumns):
-    #     sourceColumns = data_df["Map Source Columns"].tolist()
-    #     targetColumns = data_df["Map Target Columns"].tolist()
-
-    #     # mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
-    
     def upperAndReplace(checkStr):
         return checkStr.upper().replace(' ', '_')
 
@@ -72,28 +64,7 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                 case "Data Reconciliation":
                     if(listOfChecks[check]):
                         if(check not in checks_where_columns_mapping_not_needed):
-                            # minColumnListNum = min(len(listOfTableColumns["SourceColumns"]), len(listOfTableColumns["TargetColumns"]))
-                            # col1, col2 = st.columns(2)
-                            # with col1:
-                            #     st.write("Map necessary Source Columns")
-                            #     for i in range(0, minColumnListNum):
-                            #         sourceColumnName = st.selectbox("Choose the Source column name", listOfTableColumns["SourceColumns"],
-                            #                                         index=None, key=check+"col1"+"_"+str(i), label_visibility="collapsed", 
-                            #                                         placeholder="Choose Source Column")
-                            #         mappedSourceColumns.append(sourceColumnName)
-
-                            # with col2:
-                            #     st.write("Map necessary Target Columns")
-                            #     for i in range(0, minColumnListNum):
-                            #         targetColumnName = st.selectbox("Choose the Target column name", listOfTableColumns["TargetColumns"],
-                            #                                         index=None, key=check+"col2""_"+str(i), label_visibility="collapsed", 
-                            #                                         placeholder="Choose Target Column")
-                            #         mappedTargetColumns.append(targetColumnName)
-
-                            # mappedColumns = dict(zip(mappedSourceColumns, mappedTargetColumns))
-                            # filteredMappedColumns = {k: v for k, v in mappedColumns.items() if v is not None}
-                            # mappedSourceToTargetColumns[upperAndReplace(check)] = filteredMappedColumns
-                        # else:
+                            
                             col1, col2 = st.columns(2)
                             with col1:                       
                                 sourceColumns = st.multiselect("Choose necessary Source Columns", listOfTableColumns["SourceColumns"],
@@ -105,45 +76,6 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
                                 
                             mappedSourceToTargetColumns[upperAndReplace(check)] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
 
-
-                    # if(listOfChecks[check]):
-                    #     data_df = pd.DataFrame(
-                    #         {
-                    #             "Map Source Columns": [],
-                    #             "Map Target Columns": []
-
-                    #         }
-                    #     )
-
-                    #     mappedColumns = st.data_editor(
-                    #         data_df,
-                    #         column_config={
-                    #            "Map Source Columns": st.column_config.SelectboxColumn(
-                    #                 "Map Source Columns",
-                    #                 width="medium",
-                    #                 options=listOfTableColumns["SourceColumns"],
-                    #                 required=True,
-                    #             ),
-                    #              "Map Target Columns": st.column_config.SelectboxColumn(
-                    #                 "Map Target Columns",
-                    #                 width="medium",
-                    #                 options=listOfTableColumns["TargetColumns"],
-                    #                 required=True,
-                    #             )
-                    #         },
-                    #         hide_index=True,
-                    #         num_rows="dynamic",
-                    #         key=check,
-                    #         width=1000,
-                    #         on_change = storeMappedValues(data_df, mappedSourceToTargetColumns)
-                    #     )
-
-                    #     st.write(mappedColumns)
-
-                        # sourceColumns = data_df["Map Source Columns"].tolist()
-                        # targetColumns = data_df["Map Target Columns"].tolist()
-
-                        # mappedSourceToTargetColumns[check] = {"SourceColumns": sourceColumns, "TargetColumns": targetColumns}
         else:
             match qualityCheckType:
                 case "Data Validation":
@@ -184,9 +116,6 @@ def checks_list(source_connection_details=None,source_database=None,source_schem
 
 
 
-    # st.write(listOfChecksColumnsList)
-    # st.write(listOfChecks)
 
-    # st.write(mappedSourceToTargetColumns);
 
     st.button("Validate",key=f"{check_type}_validation_button",on_click=execute_queries_for_checks)

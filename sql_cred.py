@@ -22,10 +22,6 @@ def sql_Server_Cred(user_name, password, server_name, database_name, connection_
             return succ_error
         
 
-# server_name = "omniqsuiteserver.database.windows.net"
-# database_name = "testOmniQSuite"
-# user_name = "OmniQSuite"
-# password_name = "DataQuality@#123"
 
 def snow_Cred(account,user_name,password,connection_name,connection_from):
     col1,col2 = st.columns(2,gap="large")

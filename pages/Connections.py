@@ -14,12 +14,10 @@ st.markdown(hide_menu_style, unsafe_allow_html=True)
 def newConn():
     st.markdown("### Create a Connection")
 
-    #Selecting a Connection
     DataSource = st.selectbox('select a DataSource',['SQLSERVER','SNOWFLAKE'])
     st.markdown('####')
     st.markdown('####')
 
-    #Entering the connection Details
     if DataSource == 'SQLSERVER':
         sql_Server_Cred('','','','','','new_connection')
     elif DataSource == 'SNOWFLAKE':
@@ -35,7 +33,6 @@ with top_container:
 
     col1,col2 = st.columns(2,gap='small')
     newconnbutton = col1.radio('  ',['New Connection','Existing Connections'],horizontal=True,label_visibility='collapsed')
-    # st.write(newconnbutton)
     
 
     if newconnbutton=='New Connection':
@@ -45,15 +42,12 @@ with top_container:
         if os.path.exists('./cred.json'):
             with open(r'./cred.json','r') as openfile:
                 cred2 = json.load(openfile)
-                # st.write(cred2)
-                # st.write(cred2['username1']['connections'].keys())
                 
             st.markdown("### Existing Connections")
             conn = st.selectbox('Select a connection to edit',list(cred2['username1']['connections'].keys()))
             st.markdown('####')
             st.markdown('####')
 
-            # st.write(cred2['username1']['connections'][conn])
             if cred2['username1'].get('connections') and cred2['username1']['connections'].get(conn):
                 connection_name = cred2['username1']['connections'][conn]
                 if connection_name['type'] == 'AZURE_SQL_SERVER':
