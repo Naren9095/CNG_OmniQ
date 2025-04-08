@@ -33,7 +33,7 @@ def get_query(query):
             return line
 
     # If all else fails, return an error message.
-    return f"Error: Could not extract SQL query from response: {response.text}"
+    raise Exception(f"Error: Could not extract SQL query from response: {response.text}")
 
     
 

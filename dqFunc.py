@@ -230,7 +230,7 @@ def validate(connectionDetails,database:str,schema:str,table:str,check:str,colum
         resultDataframe = executeQuery(dbProvider=connectionDetails['type'],connectionDetails=connectionDetails,query=query,database=database)
         return resultDataframe
     except Exception as exc:
-        return exc
+        return st.error(f"Error validating: {exc}")
         
  
 def getDatabaseList(connectionDetails):
